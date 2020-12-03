@@ -93,9 +93,7 @@ def template_load(fullpath, _=None):
     m.__file__ = fullpath
     m.__loader__ = None
     m.__package__ = ""
-    m._ = sys.stdout
-    if _ is not None:
-        m._ = _
+    m._ = sys.stdout if _ is None else _
     with open(fullpath) as source:
         template_compile(source, fullpath, m.__dict__)
     return m

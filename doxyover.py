@@ -82,6 +82,7 @@
 # (C) 2014-2020 Bill Zissimopoulos
 
 import argparse, os, shutil, subprocess, sys, xml.etree.ElementTree as ET
+from itertools import chain
 from glob import glob
 
 sys.dont_write_bytecode = True
@@ -125,22 +126,56 @@ def readconf(path):
             conf[part[0]] = part[1]
     return conf
 
-def parsexml(path):
-    with open(path) as file:
-        elem = ET.parse(file).getroot()
-        print(elem)
+class element(object):
+    def __init__(self, XMLElement):
+        self.XMLElement = XMLElement
+    def __str__(self):
+        return str(self.XMLElement)
+    def __getitem__(self, name):
+        if name.endswith("$"):
+            name = name[:-1]
+            sret = True
+        else:
+            sret = False
+        if name:
+            attr = self.XMLElement.get(name)
+            if attr is not None:
+                return attr
+            list = self.XMLElement.findall(name)
+        else:
+            list = [self.XMLElement]
+        if sret:
+            return "".join(chain.from_iterable(e.itertext() for e in list))
+        else:
+            return [element(e) for e in list]
 
-def parseindex(path):
-    xdir = os.path.dirname(path)
-    with open(path) as file:
-        elem = ET.parse(file).getroot()
-        for e in elem.findall("compound"):
-            parsexml(os.path.join(xdir, e.get("refid")) + ".xml")
+class compound(object):
+    def __init__(self, parser, ref):
+        self.parser = parser
+        self.cref = ref
+        self.cdef = None
+    def __str__(self):
+        return str(self.cref)
+    def element(self):
+        if self.cdef is None:
+            self.cdef = self.parser.parseCompound(self.cref["refid$"])
+        return self.cdef
+
+class parser(object):
+    def __init__(self, path):
+        self.indexDir = os.path.dirname(path)
+        self.index = {}
+        with open(path) as file:
+            for e in ET.parse(file).findall("compound"):
+                self.index[e.get("refid")] = compound(self, element(e))
+    def parseCompound(self, id):
+        with open(os.path.join(self.indexDir, id + ".xml")) as file:
+            return element(ET.parse(file).find("compounddef[@id='" + id + "']"))
 
 def run():
     path = args.file
     conf = readconf(path)
-    for k in conf.keys():
+    for k in conf:
         if k.startswith("GENERATE_"):
             conf[k] = "NO"
     conf["GENERATE_HTML"] = "NO"
@@ -157,7 +192,8 @@ def run():
         cwd=cdir or None,
         check=True)
     xdir = os.path.join(cdir or ".", conf.get("OUTPUT_DIRECTORY", ""), conf.get("XML_OUTPUT", ""))
-    parseindex(os.path.join(xdir, "index.xml"))
+    p = parser(os.path.join(xdir, "index.xml"))
+    args.template.main(p.index)
 
 def main():
     global args

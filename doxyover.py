@@ -81,15 +81,11 @@
 # ---------
 # (C) 2014-2020 Bill Zissimopoulos
 
-import argparse
-import os
-import pytempl
-import shutil
-import subprocess
-import sys
-import xml.etree.ElementTree as ET
-
+import argparse, os, shutil, subprocess, sys, xml.etree.ElementTree as ET
 from glob import glob
+
+sys.dont_write_bytecode = True
+import pytempl
 
 def info(s):
     print("%s: %s" % (os.path.basename(sys.argv[0]), s))
@@ -135,11 +131,11 @@ def parsexml(path):
         print(elem)
 
 def parseindex(path):
-    odir = os.path.dirname(path)
+    xdir = os.path.dirname(path)
     with open(path) as file:
         elem = ET.parse(file).getroot()
         for e in elem.findall("compound"):
-            parsexml(os.path.join(odir, e.get("refid")) + ".xml")
+            parsexml(os.path.join(xdir, e.get("refid")) + ".xml")
 
 def run():
     path = args.file
@@ -160,19 +156,24 @@ def run():
         input="\n".join("%s=%s" % (k, v) for k, v in conf.items()).encode("utf-8"),
         cwd=cdir or None,
         check=True)
-    odir = os.path.join(cdir or ".", conf.get("OUTPUT_DIRECTORY", ""), conf.get("XML_OUTPUT", ""))
-    parseindex(os.path.join(odir, "index.xml"))
+    xdir = os.path.join(cdir or ".", conf.get("OUTPUT_DIRECTORY", ""), conf.get("XML_OUTPUT", ""))
+    parseindex(os.path.join(xdir, "index.xml"))
 
 def main():
     global args
     progdir = os.path.dirname(sys.argv[0])
     formats = [os.path.basename(f)[:-len(".pyt")]
-        for f in glob(os.path.join(os.path.join(progdir, "templates", "*.pyt")))]
+        for f in glob(os.path.join(os.path.join(progdir, "formats", "*.pyt")))]
     p = argparse.ArgumentParser()
-    p.add_argument("-f", "--output-format", choices=formats, default="html",
-        help="Output format to use")
+    p.add_argument("-f", dest="format", choices=formats, default="html",
+        help="output format")
+    p.add_argument("-F", dest="template",
+        help="format template file (overrides -f)")
     p.add_argument("file", nargs="?", default="Doxyfile")
     args = p.parse_args(sys.argv[1:])
+    if args.template is None:
+        args.template = os.path.join(progdir, "formats", args.format + ".pyt")
+    args.template = pytempl.template_load(args.template)
     run()
 
 def __entry():

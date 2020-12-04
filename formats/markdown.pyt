@@ -1,5 +1,12 @@
 from format import *
 
+textmap = {
+    "listitem": "- %s",
+}
+tailmap = {
+    "para": "\n\n%s",
+}
+
 class markdown(format):
 
     def title(self, text):
@@ -32,9 +39,8 @@ class markdown(format):
     def description(self, desc):
         : **Discussion**
         :
-        for para in desc.paraL:
-            for elem in para.XMLElement.iter():
-                : ${elem.tag}--${elem.text}--${elem.tail}..
+        : ${desc.Maptext(textmap, tailmap)}
+        :
 
 def main(index):
     markdown(index).main()

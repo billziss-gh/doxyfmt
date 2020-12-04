@@ -106,11 +106,33 @@ def readconf(path):
             conf[part[0]] = part[1]
     return conf
 
+def itermaptext(elem, textmap, tailmap):
+    f = textmap.get(elem.tag)
+    t = elem.text or ""
+    t = t and t.strip()
+    if f:
+        yield f % t
+    elif t:
+        yield t
+    for e in elem:
+        yield from itermaptext(e, textmap, tailmap)
+        f = tailmap.get(e.tag)
+        t = e.tail or ""
+        t = t and t.strip()
+        if f:
+            yield f % t
+        elif t:
+            yield t
+
 class element(object):
     def __init__(self, XMLElement):
         if XMLElement is None:
             XMLElement = ET.Element("")
         self.XMLElement = XMLElement
+    def Maptext(self, textmap, tailmap):
+        if self.XMLElement is None:
+            return ""
+        return "".join(itermaptext(self.XMLElement, textmap, tailmap))
     def __str__(self):
         return str(self.XMLElement)
     def __bool__(self):

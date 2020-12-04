@@ -14,73 +14,77 @@ class format(object):
         self.index = index
         self.language = ""
 
-    def title(self, s):
+    def title(self, text):
         pass
-    def __title(self, s):
-        if s:
-            self.title(s)
-
-    def name(self, s):
+    def name(self, text, brief):
         pass
-    def __name(self, s):
-        if s:
-            self.name(s)
-
-    def code(self, s):
+    def syntax(self, text):
         pass
-    def __code(self, s):
-        if s:
-            self.code(s)
-
-    def description(self, elem):
+    def parameters(self, list):
         pass
-    def __description(self, elem):
-        if elem["$"]:
-            self.description(elem)
-
-    def param(self, elem):
+    def returns(self, text):
+        pass
+    def members(self, list):
+        pass
+    def description(self, detail):
         pass
 
-    def member(self, elem):
-        self.__name(elem["kind$"] + " " + elem["name$"])
-        self.__code(elem["definition$"] + elem["argsstring$"])
-        for parm in elem["param%"]:
-            self.param(parm)
-        self.__description(elem["briefdescription!"])
+    def __title(self, text):
+        if text:
+            self.title(text)
+    def __name(self, text, brief):
+        if text:
+            self.name(text, brief)
+    def __syntax(self, text):
+        if text:
+            self.syntax(text)
+    def __parameters(self, list):
+        if list:
+            self.parameters(list)
+    def __returns(self, text):
+        if text:
+            self.returns(text)
+    def __members(self, list):
+        if list:
+            self.members(list)
+    def __description(self, detail):
+        if detail["$"]:
+            self.description(detail)
+
+    def memberdef(self, elem):
+        self.__name(elem["kind$"] + " " + elem["name$"], elem["briefdescription!"])
+        self.__syntax(elem["definition$"] + elem["argsstring$"])
+        self.__parameters(elem["param%"])
         self.__description(elem["detaileddescription!"])
 
-    def section(self, elem):
+    def sectiondef(self, elem):
         self.__description(elem["description!"])
         for memb in elem["memberdef%"]:
-            self.member(memb)
+            self.memberdef(memb)
 
-    def compound(self, elem):
+    def compounddef(self, elem):
         self.language = elem["language@"]
         if "file" == elem["kind@"]:
-            title = elem["title$"]
-            if title:
-                self.__title(title)
-            else:
-                title = elem["location!"]["file@"]
-                if title and not os.path.isabs(title):
-                    self.__title(title)
-                else:
-                    self.__title(elem["compoundname$"])
+            text = elem["title$"]
+            if not text:
+                text = elem["location!"]["file@"]
+                if not text or os.path.isabs(text):
+                    text = elem["compoundname$"]
+            self.__title(text)
         else:
-            self.__name(elem["kind$"] + " " + elem["compoundname$"])
-        self.__description(elem["briefdescription!"])
+            self.__name(elem["kind$"] + " " + elem["compoundname$"], elem["briefdescription!"])
         self.__description(elem["detaileddescription!"])
         for incl in elem["innerclass%"]:
             comp = self.index[incl["refid@"]].element()
             lang = self.language
-            self.compound(comp)
+            self.compounddef(comp)
             self.language = lang
         for sect in elem["sectiondef%"]:
-            self.section(sect)
+            self.sectiondef(sect)
 
     def main(self):
         for i in self.index:
             comp = self.index[i].element()
             if "file" != comp["kind@"]:
                 continue
-            self.compound(comp)
+            self.compounddef(comp)

@@ -113,28 +113,27 @@ class element(object):
         self.XMLElement = XMLElement
     def __str__(self):
         return str(self.XMLElement)
-    def __getitem__(self, name):
-        selc = name[-1:]
-        if selc == "@":
-            name = name[:-1]
+    def __bool__(self):
+        return self.XMLElement is not None
+    def __getattr__(self, name):
+        conv = name[-1:]
+        name = name[:-1]
+        if conv == "A":
             if name:
                 return self.XMLElement.get(name)
             else:
                 return ""
-        elif selc == "%":
-            name = name[:-1]
-            if name:
-                return [element(e) for e in self.XMLElement.findall(name)]
-            else:
-                return [self]
-        elif selc == "!":
-            name = name[:-1]
+        elif conv == "E":
             if name:
                 return element(self.XMLElement.find(name))
             else:
                 return self
-        elif selc == "$":
-            name = name[:-1]
+        elif conv == "L":
+            if name:
+                return [element(e) for e in self.XMLElement.findall(name)]
+            else:
+                return [self]
+        elif conv == "S":
             if name:
                 attr = self.XMLElement.get(name)
                 if attr is not None:
@@ -144,13 +143,7 @@ class element(object):
             else:
                 return "".join(self.XMLElement.itertext())
         else:
-            if name:
-                attr = self.XMLElement.get(name)
-                if attr is not None:
-                    return attr
-                return [element(e) for e in self.XMLElement.findall(name)]
-            else:
-                return [self]
+            raise AttributeError
 
 class compound(object):
     def __init__(self, parser, ref):
@@ -161,7 +154,7 @@ class compound(object):
         return str(self.cref)
     def element(self):
         if self.cdef is None:
-            self.cdef = self.parser.parseCompound(self.cref["refid@"])
+            self.cdef = self.parser.parseCompound(self.cref.refidA)
         return self.cdef
 
 class parser(object):

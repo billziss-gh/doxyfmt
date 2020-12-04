@@ -16,7 +16,7 @@ class format(object):
 
     def title(self, text):
         pass
-    def name(self, text, brief):
+    def name(self, text, desc):
         pass
     def syntax(self, text):
         pass
@@ -26,15 +26,15 @@ class format(object):
         pass
     def members(self, list):
         pass
-    def description(self, detail):
+    def description(self, desc):
         pass
 
     def __title(self, text):
         if text:
             self.title(text)
-    def __name(self, text, brief):
+    def __name(self, text, desc):
         if text:
-            self.name(text, brief)
+            self.name(text, desc)
     def __syntax(self, text):
         if text:
             self.syntax(text)
@@ -47,44 +47,44 @@ class format(object):
     def __members(self, list):
         if list:
             self.members(list)
-    def __description(self, detail):
-        if detail["$"]:
-            self.description(detail)
+    def __description(self, desc):
+        if desc.S:
+            self.description(desc)
 
     def memberdef(self, elem):
-        self.__name(elem["kind$"] + " " + elem["name$"], elem["briefdescription!"])
-        self.__syntax(elem["definition$"] + elem["argsstring$"])
-        self.__parameters(elem["param%"])
-        self.__description(elem["detaileddescription!"])
+        self.__name(elem.kindA + " " + elem.nameS, elem.briefdescriptionE)
+        self.__syntax(elem.definitionS + elem.argsstringS)
+        self.__parameters(elem.paramL)
+        self.__description(elem.detaileddescriptionE)
 
     def sectiondef(self, elem):
-        self.__description(elem["description!"])
-        for memb in elem["memberdef%"]:
+        self.__description(elem.descriptionE)
+        for memb in elem.memberdefL:
             self.memberdef(memb)
 
     def compounddef(self, elem):
-        self.language = elem["language@"]
-        if "file" == elem["kind@"]:
-            text = elem["title$"]
+        self.language = elem.languageA
+        if "file" == elem.kindA:
+            text = elem.titleS
             if not text:
-                text = elem["location!"]["file@"]
+                text = elem.locationE.fileA
                 if not text or os.path.isabs(text):
-                    text = elem["compoundname$"]
+                    text = elem.compoundnameS
             self.__title(text)
         else:
-            self.__name(elem["kind$"] + " " + elem["compoundname$"], elem["briefdescription!"])
-        self.__description(elem["detaileddescription!"])
-        for incl in elem["innerclass%"]:
-            comp = self.index[incl["refid@"]].element()
+            self.__name(elem.kindS + " " + elem.compoundnameS, elem.briefdescriptionE)
+        self.__description(elem.detaileddescriptionE)
+        for incl in elem.innerclassL:
+            comp = self.index[incl.refidA].element()
             lang = self.language
             self.compounddef(comp)
             self.language = lang
-        for sect in elem["sectiondef%"]:
+        for sect in elem.sectiondefL:
             self.sectiondef(sect)
 
     def main(self):
         for i in self.index:
             comp = self.index[i].element()
-            if "file" != comp["kind@"]:
+            if "file" != comp.kindA:
                 continue
             self.compounddef(comp)

@@ -128,26 +128,49 @@ def readconf(path):
 
 class element(object):
     def __init__(self, XMLElement):
+        if XMLElement is None:
+            XMLElement = ET.Element("")
         self.XMLElement = XMLElement
     def __str__(self):
         return str(self.XMLElement)
     def __getitem__(self, name):
-        if name.endswith("$"):
+        selc = name[-1:]
+        if selc == "@":
             name = name[:-1]
-            sret = True
+            if name:
+                return self.XMLElement.get(name)
+            else:
+                return ""
+        elif selc == "%":
+            name = name[:-1]
+            if name:
+                return [element(e) for e in self.XMLElement.findall(name)]
+            else:
+                return [self]
+        elif selc == "!":
+            name = name[:-1]
+            if name:
+                return element(self.XMLElement.find(name))
+            else:
+                return self
+        elif selc == "$":
+            name = name[:-1]
+            if name:
+                attr = self.XMLElement.get(name)
+                if attr is not None:
+                    return attr
+                return "".join(
+                    chain.from_iterable(e.itertext() for e in self.XMLElement.findall(name)))
+            else:
+                return "".join(self.XMLElement.itertext())
         else:
-            sret = False
-        if name:
-            attr = self.XMLElement.get(name)
-            if attr is not None:
-                return attr
-            list = self.XMLElement.findall(name)
-        else:
-            list = [self.XMLElement]
-        if sret:
-            return "".join(chain.from_iterable(e.itertext() for e in list))
-        else:
-            return [element(e) for e in list]
+            if name:
+                attr = self.XMLElement.get(name)
+                if attr is not None:
+                    return attr
+                return [element(e) for e in self.XMLElement.findall(name)]
+            else:
+                return [self]
 
 class compound(object):
     def __init__(self, parser, ref):
@@ -158,7 +181,7 @@ class compound(object):
         return str(self.cref)
     def element(self):
         if self.cdef is None:
-            self.cdef = self.parser.parseCompound(self.cref["refid$"])
+            self.cdef = self.parser.parseCompound(self.cref["refid@"])
         return self.cdef
 
 class parser(object):

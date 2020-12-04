@@ -2,6 +2,7 @@ from format import *
 
 textmap = {
     "listitem": "- %s",
+    "ndash": "--%s",
 }
 tailmap = {
     "para": "\n\n%s",

@@ -129,10 +129,6 @@ class element(object):
         if XMLElement is None:
             XMLElement = ET.Element("")
         self.XMLElement = XMLElement
-    def Maptext(self, textmap, tailmap):
-        if self.XMLElement is None:
-            return ""
-        return "".join(itermaptext(self.XMLElement, textmap, tailmap))
     def __str__(self):
         return str(self.XMLElement)
     def __bool__(self):
@@ -167,6 +163,10 @@ class element(object):
             return result if conv == "S" else result.strip()
         else:
             raise AttributeError
+    def Maptext(self, textmap, tailmap):
+        if self.XMLElement is None:
+            return ""
+        return "".join(itermaptext(self.XMLElement, textmap, tailmap))
 
 class compound(object):
     def __init__(self, parser, ref):

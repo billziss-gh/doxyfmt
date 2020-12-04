@@ -133,15 +133,16 @@ class element(object):
                 return [element(e) for e in self.XMLElement.findall(name)]
             else:
                 return [self]
-        elif conv == "S":
+        elif conv == "S" or conv == "T":
             if name:
                 attr = self.XMLElement.get(name)
                 if attr is not None:
                     return attr
-                return "".join(
+                result = "".join(
                     chain.from_iterable(e.itertext() for e in self.XMLElement.findall(name)))
             else:
-                return "".join(self.XMLElement.itertext())
+                result = "".join(self.XMLElement.itertext())
+            return result if conv == "S" else result.strip()
         else:
             raise AttributeError
 

@@ -48,7 +48,7 @@ class format(object):
         if list:
             self.members(list)
     def __description(self, desc):
-        if desc.S:
+        if desc.T:
             self.description(desc)
 
     def memberdef(self, elem):

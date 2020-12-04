@@ -67,7 +67,7 @@ class format(object):
                 else:
                     self.__title(elem["compoundname$"])
         else:
-            self.__name(elem["compoundname$"])
+            self.__name(elem["kind$"] + " " + elem["compoundname$"])
         self.__description(elem["briefdescription!"])
         self.__description(elem["detaileddescription!"])
         for incl in elem["innerclass%"]:

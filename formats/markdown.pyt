@@ -10,7 +10,7 @@ textmap = {
 tailmap = {
     "para": "\n\n%s",
 }
-chldmap = {
+descflt = {
     "para": lambda elem: elem.find("parameterlist") is None,
     "parameterlist": False,
 }
@@ -39,7 +39,6 @@ class markdown(format):
         : **Parameters**
         :
         : ${parl.Maptext(textmap, tailmap)}
-        :
 
     def returns(self, text):
         pass
@@ -50,8 +49,7 @@ class markdown(format):
     def description(self, desc):
         : **Discussion**
         :
-        : ${desc.Maptext(textmap, tailmap, chldmap)}
-        :
+        : ${desc.Maptext(textmap, tailmap, descflt)}
 
 def main(index):
     markdown(index).main()

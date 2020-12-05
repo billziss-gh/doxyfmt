@@ -12,7 +12,6 @@ tailmap = {
 }
 descflt = {
     "para": lambda e: e.find("parameterlist") is None,
-    "parameterlist": False,
 }
 
 class markdown(format):
@@ -40,8 +39,10 @@ class markdown(format):
         :
         : ${parl.Maptext(textmap, tailmap)}
 
-    def returns(self, text):
-        pass
+    def returns(self, retv):
+        : **Return Value**
+        :
+        : ${retv.Maptext(textmap, tailmap)}
 
     def members(self, list):
         pass

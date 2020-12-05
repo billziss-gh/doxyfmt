@@ -22,7 +22,7 @@ class format(object):
         pass
     def parameters(self, parl):
         pass
-    def returns(self, text):
+    def returns(self, retv):
         pass
     def members(self, list):
         pass
@@ -41,9 +41,9 @@ class format(object):
     def __parameters(self, parl):
         if parl.T:
             self.parameters(parl)
-    def __returns(self, text):
-        if text:
-            self.returns(text)
+    def __returns(self, retv):
+        if retv.T:
+            self.returns(retv)
     def __members(self, list):
         if list:
             self.members(list)
@@ -51,6 +51,7 @@ class format(object):
         if not desc.T:
             return
         self.__parameters(desc[".//parameterlistE"])
+        self.__returns(desc[".//simplesect[@kind='return']E"])
         self.description(desc)
 
     def memberdef(self, elem):

@@ -112,6 +112,8 @@ def itermaptext(elem, textmap, tailmap, filter = None):
     t = elem.text or ""
     t = t and t.strip()
     if f:
+        if callable(f):
+            f = f(elem)
         yield f % t
     elif t:
         yield t
@@ -128,6 +130,8 @@ def itermaptext(elem, textmap, tailmap, filter = None):
         t = e.tail or ""
         t = t and t.strip()
         if f:
+            if callable(f):
+                f = f(e)
             yield f % t
         elif t:
             yield t

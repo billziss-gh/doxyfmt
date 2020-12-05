@@ -11,7 +11,7 @@ tailmap = {
     "para": "\n\n%s",
 }
 descflt = {
-    "para": lambda elem: elem.find("parameterlist") is None,
+    "para": lambda e: e.find("parameterlist") is None,
     "parameterlist": False,
 }
 

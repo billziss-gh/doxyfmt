@@ -106,8 +106,15 @@ def readconf(path):
             conf[part[0]] = part[1]
     return conf
 
-def itermaptext(elem, textmap, tailmap):
-    f = textmap.get(elem.tag)
+def itermaptext(elem, textmap, tailmap, chldmap = None):
+    g = elem.tag
+    if chldmap:
+        c = chldmap.get(g, True)
+        if callable(c):
+            c = c(elem)
+        if not c:
+            return
+    f = textmap.get(g)
     t = elem.text or ""
     t = t and t.strip()
     if f:
@@ -115,7 +122,7 @@ def itermaptext(elem, textmap, tailmap):
     elif t:
         yield t
     for e in elem:
-        yield from itermaptext(e, textmap, tailmap)
+        yield from itermaptext(e, textmap, tailmap, chldmap)
         f = tailmap.get(e.tag)
         t = e.tail or ""
         t = t and t.strip()
@@ -133,6 +140,8 @@ class element(object):
         return str(self.XMLElement)
     def __bool__(self):
         return self.XMLElement is not None
+    def __getitem__(self, name):
+        return self.__getattr__(name)
     def __getattr__(self, name):
         conv = name[-1:]
         name = name[:-1]
@@ -163,10 +172,10 @@ class element(object):
             return result if conv == "S" else result.strip()
         else:
             raise AttributeError
-    def Maptext(self, textmap, tailmap):
+    def Maptext(self, textmap, tailmap, chldmap = None):
         if self.XMLElement is None:
             return ""
-        return "".join(itermaptext(self.XMLElement, textmap, tailmap))
+        return "".join(itermaptext(self.XMLElement, textmap, tailmap, chldmap))
 
 class compound(object):
     def __init__(self, parser, ref):

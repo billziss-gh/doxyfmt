@@ -20,7 +20,7 @@ class format(object):
         pass
     def syntax(self, text):
         pass
-    def parameters(self, list):
+    def parameters(self, parl):
         pass
     def returns(self, text):
         pass
@@ -38,9 +38,9 @@ class format(object):
     def __syntax(self, text):
         if text:
             self.syntax(text)
-    def __parameters(self, list):
-        if list:
-            self.parameters(list)
+    def __parameters(self, parl):
+        if parl.T:
+            self.parameters(parl)
     def __returns(self, text):
         if text:
             self.returns(text)
@@ -48,13 +48,14 @@ class format(object):
         if list:
             self.members(list)
     def __description(self, desc):
-        if desc.T:
-            self.description(desc)
+        if not desc.T:
+            return
+        self.__parameters(desc[".//parameterlistE"])
+        self.description(desc)
 
     def memberdef(self, elem):
         self.__name(elem.kindA + " " + elem.nameS, elem.briefdescriptionE)
         self.__syntax(elem.definitionS + elem.argsstringS)
-        self.__parameters(elem.paramL)
         self.__description(elem.detaileddescriptionE)
 
     def sectiondef(self, elem):

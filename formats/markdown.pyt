@@ -3,9 +3,16 @@ from format import *
 textmap = {
     "listitem": "- %s",
     "ndash": "--%s",
+    "parameteritem": "- %s",
+    "parametername": "*%s*",
+    "parameterdescription": " - %s",
 }
 tailmap = {
     "para": "\n\n%s",
+}
+chldmap = {
+    "para": lambda elem: elem.find("parameterlist") is None,
+    "parameterlist": False,
 }
 
 class markdown(format):
@@ -28,8 +35,11 @@ class markdown(format):
         : ```
         :
 
-    def parameters(self, list):
-        pass
+    def parameters(self, parl):
+        : **Parameters**
+        :
+        : ${parl.Maptext(textmap, tailmap)}
+        :
 
     def returns(self, text):
         pass
@@ -40,7 +50,7 @@ class markdown(format):
     def description(self, desc):
         : **Discussion**
         :
-        : ${desc.Maptext(textmap, tailmap)}
+        : ${desc.Maptext(textmap, tailmap, chldmap)}
         :
 
 def main(index):

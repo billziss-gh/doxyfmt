@@ -10,10 +10,14 @@
 import os
 
 class format(object):
-    def __init__(self, index):
+    def __init__(self, index, outdir, fileext):
         self.index = index
+        self.outdir = outdir
+        self.fileext = fileext
         self.language = ""
 
+    def setoutfile(self, file):
+        pass
     def title(self, text):
         pass
     def name(self, text, desc):
@@ -89,4 +93,10 @@ class format(object):
             comp = self.index[i].element()
             if "file" != comp.kindA:
                 continue
-            self.compounddef(comp)
+            file = comp.locationE.fileA
+            if not file:
+                file = elem.compoundnameS
+            file = file.replace("_", "__").replace(":", "").replace("/", "_").replace("\\", "_")
+            with open(os.path.join(self.outdir, file + self.fileext), "w") as ofile:
+                self.setoutfile(ofile)
+                self.compounddef(comp)

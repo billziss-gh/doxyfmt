@@ -76,6 +76,12 @@ def fail(s, exitcode = 1):
     warn(s)
     sys.exit(exitcode)
 
+def mkdirs(path):
+    try:
+        os.makedirs(path)
+    except:
+        pass
+
 def readconf(path):
     conf = {}
     with open(path) as file:
@@ -226,7 +232,9 @@ def run():
         check=True)
     xdir = os.path.join(cdir or ".", conf.get("OUTPUT_DIRECTORY", ""), conf.get("XML_OUTPUT", ""))
     p = parser(os.path.join(xdir, "index.xml"))
-    args.template.main(p.index)
+    if args.output_directory:
+        mkdirs(args.output_directory)
+    args.template.main(p.index, args.output_directory or ".")
 
 def main():
     global args
@@ -238,6 +246,8 @@ def main():
         help="output format")
     p.add_argument("-F", dest="template",
         help="format template file (overrides -f)")
+    p.add_argument("-o", dest="output_directory",
+        help="output directory")
     p.add_argument("file", nargs="?", default="Doxyfile")
     args = p.parse_args(sys.argv[1:])
     if args.template is None:

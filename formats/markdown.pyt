@@ -16,6 +16,10 @@ descflt = {
 
 class markdown(format):
 
+    def setoutfile(self, file):
+        global _
+        _ = file
+
     def title(self, text):
         : # ${text}
         :
@@ -52,5 +56,5 @@ class markdown(format):
         :
         : ${desc.Maptext(textmap, tailmap, descflt)}
 
-def main(index):
-    markdown(index).main()
+def main(index, outdir):
+    markdown(index, outdir, ".md").main()

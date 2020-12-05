@@ -108,12 +108,6 @@ def readconf(path):
 
 def itermaptext(elem, textmap, tailmap, filter = None):
     g = elem.tag
-    if filter:
-        c = filter.get(g, True)
-        if callable(c):
-            c = c(elem)
-        if not c:
-            return
     f = textmap.get(g)
     t = elem.text or ""
     t = t and t.strip()

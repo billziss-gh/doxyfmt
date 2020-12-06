@@ -86,7 +86,7 @@ class markdown(format):
         if "begin" == ev:
             details = \
                 (elem.N == "compounddef" and elem.kindA in ["class", "struct", "union"]) or \
-                (elem.N == "memberdef" and elem.kindA in ["define", "function"])
+                (elem.N == "memberdef" and elem.kindA in ["define", "enum", "function"])
             self.details.append(details)
             if details:
                 : <details>

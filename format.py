@@ -47,7 +47,7 @@ class format(object):
         "define": "Macros",
         "prototype": "",
         "typedef": "Typedefs",
-        "enum": "",
+        "enum": "Enums",
         "func": "Functions",
         "var": "",
     }

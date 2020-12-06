@@ -32,6 +32,8 @@ class format(object):
         pass
     def description(self, desc):
         pass
+    def event(self, elem, ev):
+        pass
 
     def __title(self, text):
         if text:
@@ -59,9 +61,11 @@ class format(object):
         self.description(desc)
 
     def memberdef(self, elem):
-        self.__name(elem.kindA + " " + elem.nameS, elem.briefdescriptionE)
+        self.event(elem, "begin")
+        self.__name(elem.nameS + " " + elem.kindA, elem.briefdescriptionE)
         self.__syntax(elem.definitionS + elem.argsstringS)
         self.__description(elem.detaileddescriptionE)
+        self.event(elem, "end")
 
     def sectiondef(self, elem):
         self.__description(elem.descriptionE)
@@ -70,6 +74,7 @@ class format(object):
 
     def compounddef(self, elem):
         self.language = elem.languageA
+        self.event(elem, "begin")
         if "file" == elem.kindA:
             text = elem.titleS
             if not text:
@@ -78,7 +83,7 @@ class format(object):
                     text = elem.compoundnameS
             self.__title(text)
         else:
-            self.__name(elem.kindS + " " + elem.compoundnameS, elem.briefdescriptionE)
+            self.__name(elem.compoundnameS + " " + elem.kindA, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)
         for incl in elem.innerclassL:
             comp = self.index[incl.refidA].element()
@@ -87,6 +92,7 @@ class format(object):
             self.language = lang
         for sect in elem.sectiondefL:
             self.sectiondef(sect)
+        self.event(elem, "end")
 
     def main(self):
         for i in self.index:

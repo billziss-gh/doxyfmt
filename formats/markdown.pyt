@@ -1,4 +1,4 @@
-import re
+import html, re
 from format import *
 
 textmap = {
@@ -28,6 +28,9 @@ def escape(text):
     return text
 
 class markdown(format):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.details = []
 
     def setoutfile(self, file):
         global _
@@ -38,11 +41,21 @@ class markdown(format):
         :
 
     def name(self, text, desc):
-        if desc.T:
-            : **${escape(text)}** - ${escape(desc.T)}
+        if self.details[-1]:
+            : <summary>
+            if desc.T:
+                : <b>${html.escape(text)}</b> - ${html.escape(desc.T)}
+            else:
+                : <b>${html.escape(text)}</b>
+            : </summary>
+            : <blockquote>
+            : <br/>
             :
         else:
-            : **${escape(text)}**
+            if desc.T:
+                : **${escape(text)}** - ${escape(desc.T)}
+            else:
+                : **${escape(text)}**
             :
 
     def syntax(self, text):
@@ -68,6 +81,19 @@ class markdown(format):
         : **Discussion**
         :
         : ${desc.Maptext(escape, textmap, tailmap, descflt)}
+
+    def event(self, elem, ev):
+        if "begin" == ev:
+            details = elem.kindA in ["class", "struct", "union", "function"]
+            self.details.append(details)
+            if details:
+                : <details>
+        elif "end" == ev:
+            details = self.details.pop()
+            if details:
+                # name() adds <blockquote>; remove it
+                : </blockquote>
+                : </details>
 
 def main(index, outdir):
     markdown(index, outdir, ".md").main()

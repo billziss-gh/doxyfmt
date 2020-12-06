@@ -44,7 +44,7 @@ class format(object):
         "private-static-attrib": "",
         "friend": "",
         "related": "",
-        "define": "",
+        "define": "Macros",
         "prototype": "",
         "typedef": "Typedefs",
         "enum": "",
@@ -62,7 +62,7 @@ class format(object):
         pass
     def title(self, text, heading):
         pass
-    def name(self, text, desc):
+    def name(self, kind, text, desc):
         pass
     def syntax(self, text):
         pass
@@ -80,9 +80,9 @@ class format(object):
     def __title(self, text, heading):
         if text:
             self.title(text, heading)
-    def __name(self, text, desc):
+    def __name(self, kind, text, desc):
         if text:
-            self.name(text, desc)
+            self.name(kind, text, desc)
     def __syntax(self, text):
         if text:
             self.syntax(text)
@@ -104,7 +104,7 @@ class format(object):
 
     def memberdef(self, elem):
         self.event(elem, "begin")
-        self.__name(elem.nameS + " " + elem.kindA, elem.briefdescriptionE)
+        self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
         self.__syntax(elem.definitionS + elem.argsstringS)
         self.__description(elem.detaileddescriptionE)
         self.event(elem, "end")
@@ -120,6 +120,16 @@ class format(object):
             self.memberdef(memb)
         self.event(elem, "end")
 
+    def innerclass_section(self, elem):
+        list = elem.innerclassL
+        if list:
+            self.__title("Structures", 2)
+            for incl in list:
+                lang = self.language
+                comp = self.index[incl.refidA].element()
+                self.compounddef(comp)
+                self.language = lang
+
     def compounddef(self, elem):
         self.language = elem.languageA
         self.event(elem, "begin")
@@ -131,13 +141,9 @@ class format(object):
                     text = elem.compoundnameS
             self.__title(text, 1)
         else:
-            self.__name(elem.compoundnameS + " " + elem.kindA, elem.briefdescriptionE)
+            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)
-        for incl in elem.innerclassL:
-            comp = self.index[incl.refidA].element()
-            lang = self.language
-            self.compounddef(comp)
-            self.language = lang
+        self.innerclass_section(elem)
         for sect in elem.sectiondefL:
             self.sectiondef(sect)
         self.event(elem, "end")

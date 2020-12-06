@@ -40,7 +40,7 @@ class markdown(format):
         : #${heading * "#"} ${escape(text)}
         :
 
-    def name(self, text, desc):
+    def name(self, kind, text, desc):
         if self.details[-1]:
             : <summary>
             if desc.T:

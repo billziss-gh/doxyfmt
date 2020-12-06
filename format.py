@@ -110,7 +110,6 @@ class format(object):
         self.event(elem, "end")
 
     def sectiondef(self, elem):
-        self.event(elem, "begin")
         text = elem.headerS
         if not text:
             text = self.section_titles.get(elem.kindA, "")
@@ -118,7 +117,6 @@ class format(object):
         self.__description(elem.descriptionE)
         for memb in elem.memberdefL:
             self.memberdef(memb)
-        self.event(elem, "end")
 
     def innerclass_section(self, elem):
         list = elem.innerclassL

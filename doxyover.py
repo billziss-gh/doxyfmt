@@ -203,7 +203,7 @@ class compound(object):
         return str(self.cref)
     def element(self):
         if self.cdef is None:
-            self.cdef = self.parser.parseCompound(self.cref.refidA)
+            self.cdef = self.parser.parse_compound(self.cref.refidA)
         return self.cdef
 
 class parser(object):
@@ -213,7 +213,7 @@ class parser(object):
         with open(path) as file:
             for e in ET.parse(file).findall("compound"):
                 self.index[e.get("refid")] = compound(self, element(e))
-    def parseCompound(self, id):
+    def parse_compound(self, id):
         with open(os.path.join(self.indexDir, id + ".xml")) as file:
             return element(ET.parse(file).find("compounddef[@id='" + id + "']"))
 

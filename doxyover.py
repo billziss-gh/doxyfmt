@@ -171,6 +171,12 @@ class element(object):
                 return [element(e) for e in self.XMLElement.findall(name)]
             else:
                 return [self]
+        elif conv == "N":
+            if name:
+                XMLElement = self.XMLElement.find(name)
+                return XMLElement.tag if XMLElement is not None else ""
+            else:
+                return self.XMLElement.tag
         elif conv == "S" or conv == "T":
             if name:
                 attr = self.XMLElement.get(name)

@@ -84,7 +84,9 @@ class markdown(format):
 
     def event(self, elem, ev):
         if "begin" == ev:
-            details = elem.kindA in ["class", "struct", "union", "function"]
+            details = \
+                (elem.N == "compounddef" and elem.kindA in ["class", "struct", "union"]) or \
+                (elem.N == "memberdef" and elem.kindA in ["function"])
             self.details.append(details)
             if details:
                 : <details>
@@ -94,6 +96,7 @@ class markdown(format):
                 # name() adds <blockquote>; remove it
                 : </blockquote>
                 : </details>
+                :
 
 def main(index, outdir):
     markdown(index, outdir, ".md").main()

@@ -68,9 +68,11 @@ class format(object):
         self.event(elem, "end")
 
     def sectiondef(self, elem):
+        self.event(elem, "begin")
         self.__description(elem.descriptionE)
         for memb in elem.memberdefL:
             self.memberdef(memb)
+        self.event(elem, "end")
 
     def compounddef(self, elem):
         self.language = elem.languageA

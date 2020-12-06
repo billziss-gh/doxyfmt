@@ -9,7 +9,49 @@
 
 import os
 
+section_titles = {
+}
+
 class format(object):
+    section_titles = {
+        "user-defined": "",
+        "public-type": "",
+        "public-func": "",
+        "public-attrib": "",
+        "public-slot": "",
+        "signal": "",
+        "dcop-func": "",
+        "property": "",
+        "event": "",
+        "public-static-func": "",
+        "public-static-attrib": "",
+        "protected-type": "",
+        "protected-func": "",
+        "protected-attrib": "",
+        "protected-slot": "",
+        "protected-static-func": "",
+        "protected-static-attrib": "",
+        "package-type": "",
+        "package-func": "",
+        "package-attrib": "",
+        "package-static-func": "",
+        "package-static-attrib": "",
+        "private-type": "",
+        "private-func": "",
+        "private-attrib": "",
+        "private-slot": "",
+        "private-static-func": "",
+        "private-static-attrib": "",
+        "friend": "",
+        "related": "",
+        "define": "",
+        "prototype": "",
+        "typedef": "Typedefs",
+        "enum": "",
+        "func": "Functions",
+        "var": "",
+    }
+
     def __init__(self, index, outdir, fileext):
         self.index = index
         self.outdir = outdir
@@ -18,7 +60,7 @@ class format(object):
 
     def setoutfile(self, file):
         pass
-    def title(self, text):
+    def title(self, text, heading):
         pass
     def name(self, text, desc):
         pass
@@ -35,9 +77,9 @@ class format(object):
     def event(self, elem, ev):
         pass
 
-    def __title(self, text):
+    def __title(self, text, heading):
         if text:
-            self.title(text)
+            self.title(text, heading)
     def __name(self, text, desc):
         if text:
             self.name(text, desc)
@@ -69,6 +111,10 @@ class format(object):
 
     def sectiondef(self, elem):
         self.event(elem, "begin")
+        text = elem.headerS
+        if not text:
+            text = self.section_titles.get(elem.kindA, "")
+        self.__title(text, 2)
         self.__description(elem.descriptionE)
         for memb in elem.memberdefL:
             self.memberdef(memb)
@@ -83,7 +129,7 @@ class format(object):
                 text = elem.locationE.fileA
                 if not text or os.path.isabs(text):
                     text = elem.compoundnameS
-            self.__title(text)
+            self.__title(text, 1)
         else:
             self.__name(elem.compoundnameS + " " + elem.kindA, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)

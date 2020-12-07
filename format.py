@@ -147,13 +147,10 @@ class format(object):
         if list:
             self.__title("Structures", 2)
             for incl in list:
-                lang = self.language
                 comp = self.index[incl.refidA].element()
                 self.compounddef(comp)
-                self.language = lang
 
     def compounddef(self, elem):
-        self.language = elem.languageA
         self.__event(elem, "begin")
         if "file" == elem.kindA:
             text = elem.titleS
@@ -175,6 +172,7 @@ class format(object):
             comp = self.index[i].element()
             if "file" != comp.kindA:
                 continue
+            self.language = comp.languageA
             file = comp.locationE.fileA
             if not file:
                 file = elem.compoundnameS

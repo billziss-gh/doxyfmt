@@ -7,7 +7,7 @@
 # It is licensed under the MIT license. The full license text can be found
 # in the License.txt file at the root of this project.
 
-import os
+import os, re
 
 section_titles = {
 }
@@ -54,6 +54,7 @@ class format(object):
         "func": "Functions",
         "var": "",
     }
+    anon_re = re.compile(r"@[0-9]")
 
     def __init__(self, index, outdir, fileext):
         self.index = index
@@ -84,6 +85,8 @@ class format(object):
             self.title(text, heading)
     def __name(self, text, desc):
         if text:
+            if self.anon_re.match(text):
+                text = "<anonymous>"
             self.name(text, desc)
     def __syntax(self, text):
         if text:

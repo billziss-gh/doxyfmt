@@ -131,13 +131,13 @@ class format(object):
 
     def memberdef(self, elem):
         self.__event(elem, "begin")
-        if "variable" == elem.kindA:
-            self.__name(elem.kindA, elem.typeS + " " + elem.nameS, elem.briefdescriptionE)
-        else:
+        if self.isdetailed():
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
             self.__syntax(elem.definitionS + elem.argsstringS)
             self.__enumvalues(elem.enumvalueL)
             self.__description(elem.detaileddescriptionE)
+        else:
+            self.__name(elem.kindA, " ".join([elem.typeS, elem.nameS]), elem.briefdescriptionE)
         self.__event(elem, "end")
 
     def sectiondef(self, elem):

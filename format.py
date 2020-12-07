@@ -114,7 +114,7 @@ class format(object):
         if "begin" == ev:
             self.detailed.append(
                 (elem.N == "compounddef" and elem.kindA in ["class", "struct", "union"]) or
-                (elem.N == "memberdef" and elem.kindA in ["define", "enum", "function"]))
+                (elem.N == "memberdef" and elem.kindA in ["define", "enum", "typedef", "function"]))
             self.event(elem, ev)
         elif "end" == ev:
             self.event(elem, ev)

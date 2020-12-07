@@ -83,10 +83,10 @@ class format(object):
     def __title(self, text, heading):
         if text:
             self.title(text, heading)
-    def __name(self, text, desc):
+    def __name(self, kind, text, desc):
         if text:
             if self.anon_re.match(text):
-                text = "<anonymous>"
+                text = "anonymous " + kind
             self.name(text, desc)
     def __syntax(self, text):
         if text:
@@ -95,7 +95,7 @@ class format(object):
         if enml:
             self.detailed.append(False)
             for elem in enml:
-                self.__name(elem.nameS, elem.briefdescriptionE)
+                self.__name("enum", elem.nameS, elem.briefdescriptionE)
             self.detailed.pop()
     def __parameters(self, parl):
         if parl.T:
@@ -125,9 +125,9 @@ class format(object):
     def memberdef(self, elem):
         self.__event(elem, "begin")
         if "variable" == elem.kindA:
-            self.__name(elem.typeS + " " + elem.nameS, elem.briefdescriptionE)
+            self.__name(elem.kindA, elem.typeS + " " + elem.nameS, elem.briefdescriptionE)
         else:
-            self.__name(elem.nameS, elem.briefdescriptionE)
+            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
             self.__syntax(elem.definitionS + elem.argsstringS)
             self.__enumvalues(elem.enumvalueL)
             self.__description(elem.detaileddescriptionE)
@@ -160,7 +160,7 @@ class format(object):
                     text = elem.compoundnameS
             self.__title(text, 1)
         else:
-            self.__name(elem.compoundnameS, elem.briefdescriptionE)
+            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)
         self.innerclass_section(elem)
         for sect in elem.sectiondefL:

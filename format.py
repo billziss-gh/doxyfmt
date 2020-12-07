@@ -57,6 +57,7 @@ class format(object):
         self.outdir = outdir
         self.fileext = fileext
         self.language = ""
+        self.detailed = []
 
     def setoutfile(self, file):
         pass
@@ -101,13 +102,24 @@ class format(object):
         self.__parameters(desc[".//parameterlistE"])
         self.__returns(desc[".//simplesect[@kind='return']E"])
         self.description(desc)
+    def __event(self, elem, ev):
+        if "begin" == ev:
+            self.detailed.append(
+                (elem.N == "compounddef" and elem.kindA in ["class", "struct", "union"]) or
+                (elem.N == "memberdef" and elem.kindA in ["define", "enum", "function"]))
+            self.event(elem, ev)
+        elif "end" == ev:
+            self.event(elem, ev)
+            self.detailed.pop()
+    def isdetailed(self):
+        return self.detailed and self.detailed[-1]
 
     def memberdef(self, elem):
-        self.event(elem, "begin")
+        self.__event(elem, "begin")
         self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
         self.__syntax(elem.definitionS + elem.argsstringS)
         self.__description(elem.detaileddescriptionE)
-        self.event(elem, "end")
+        self.__event(elem, "end")
 
     def sectiondef(self, elem):
         text = elem.headerS
@@ -118,7 +130,7 @@ class format(object):
         for memb in elem.memberdefL:
             self.memberdef(memb)
 
-    def innerclass_section(self, elem):
+    def inner_section(self, elem):
         list = elem.innerclassL
         if list:
             self.__title("Structures", 2)
@@ -130,7 +142,7 @@ class format(object):
 
     def compounddef(self, elem):
         self.language = elem.languageA
-        self.event(elem, "begin")
+        self.__event(elem, "begin")
         if "file" == elem.kindA:
             text = elem.titleS
             if not text:
@@ -141,10 +153,10 @@ class format(object):
         else:
             self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)
-        self.innerclass_section(elem)
+        self.inner_section(elem)
         for sect in elem.sectiondefL:
             self.sectiondef(sect)
-        self.event(elem, "end")
+        self.__event(elem, "end")
 
     def main(self):
         for i in self.index:

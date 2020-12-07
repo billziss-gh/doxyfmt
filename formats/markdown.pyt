@@ -28,10 +28,6 @@ def escape(text):
     return text
 
 class markdown(format):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.details = []
-
     def setoutfile(self, file):
         global _
         _ = file
@@ -41,7 +37,7 @@ class markdown(format):
         :
 
     def name(self, kind, text, desc):
-        if self.details[-1]:
+        if self.isdetailed():
             : <summary>
             if desc.T:
                 : <b>${html.escape(text)}</b> - ${html.escape(desc.T)}
@@ -84,15 +80,10 @@ class markdown(format):
 
     def event(self, elem, ev):
         if "begin" == ev:
-            details = \
-                (elem.N == "compounddef" and elem.kindA in ["class", "struct", "union"]) or \
-                (elem.N == "memberdef" and elem.kindA in ["define", "enum", "function"])
-            self.details.append(details)
-            if details:
+            if self.isdetailed():
                 : <details>
         elif "end" == ev:
-            details = self.details.pop()
-            if details:
+            if self.isdetailed():
                 # name() adds <blockquote>; remove it
                 : </blockquote>
                 : </details>

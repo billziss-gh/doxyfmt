@@ -13,9 +13,6 @@ section_titles = {
 }
 
 class format(object):
-    description_filter = {
-        "para": lambda e: e.find("parameterlist") is None,
-    }
     section_titles = {
         "user-defined": "",
         "public-type": "",
@@ -55,6 +52,9 @@ class format(object):
         "var": "",
     }
     anon_re = re.compile(r"@[0-9]")
+    description_filter = {
+        "para": lambda e: e.find("parameterlist") is None,
+    }
 
     def __init__(self, index, outdir, fileext):
         self.index = index

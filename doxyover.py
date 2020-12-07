@@ -229,6 +229,7 @@ def run():
     conf["GENERATE_HTML"] = "NO"
     conf["GENERATE_LATEX"] = "NO"
     conf["GENERATE_XML"] = "YES"
+    conf["XML_PROGRAMLISTING"] = "NO"
     doxy = shutil.which("doxygen")
     if not doxy:
         if sys.platform.startswith("win32"):

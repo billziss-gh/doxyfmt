@@ -3,14 +3,14 @@ from format import *
 
 class markdown(format):
     textmap = {
-        "listitem": "- %s",
-        "ndash": "--%s",
-        "parameteritem": "- %s",
-        "parametername": "*%s*",
-        "parameterdescription": " - %s",
+        "listitem":                     "- %s",
+        "ndash":                        "--%s",
+        "parameteritem":                "- %s",
+        "parametername":                "*%s*",
+        "parameterdescription":         " - %s",
     }
     tailmap = {
-        "para": "\n\n%s",
+        "para":                         "\n\n%s",
     }
     reC = re.compile
     escape_re = [

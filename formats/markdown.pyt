@@ -12,12 +12,13 @@ class markdown(format):
     tailmap = {
         "para": "\n\n%s",
     }
+    reC = re.compile
     escape_re = [
-        re.compile(r"([\\`*_])"),                   r"\\\1",
-        re.compile(r"\[(.*]\()"),                   r"\\[\1",
-        re.compile(r"^([ \t]*)>"),                  r"\1\\>",
-        re.compile(r"^([ \t]*)([#+-][ \t])"),       r"\1\\\2",
-        re.compile(r"^([ \t]*)([0-9])([.)][ \t])"), r"\1\2\\\3",
+        reC(r"([\\`*_])"),                  r"\\\1",
+        reC(r"\[(.*]\()"),                  r"\\[\1",
+        reC(r"^([ \t]*)>"),                 r"\1\\>",
+        reC(r"^([ \t]*)([#+-][ \t])"),      r"\1\\\2",
+        reC(r"^([ \t]*)([0-9])([.)][ \t])"),r"\1\2\\\3",
     ]
 
     @classmethod

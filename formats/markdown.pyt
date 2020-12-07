@@ -1,5 +1,5 @@
 import html, re
-from format import *
+from format import format
 
 class markdown(format):
     textmap = {

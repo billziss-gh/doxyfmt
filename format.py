@@ -9,9 +9,6 @@
 
 import os, re
 
-section_titles = {
-}
-
 class format(object):
     section_titles = {
         "user-defined": "",

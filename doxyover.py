@@ -192,6 +192,9 @@ class element(object):
     def Maptext(self, escape, textmap, tailmap, filter = None):
         if self.XMLElement is None:
             return ""
+        escape = escape or (lambda t: t)
+        textmap = textmap or {}
+        tailmap = tailmap or {}
         return "".join(itermaptext(self.XMLElement, escape, textmap, tailmap, filter))
 
 class compound(object):

@@ -11,9 +11,6 @@ textmap = {
 tailmap = {
     "para": "\n\n%s",
 }
-descflt = {
-    "para": lambda e: e.find("parameterlist") is None,
-}
 
 escape_re = [
     re.compile(r"([\\`*_])"),                   r"\\\1",
@@ -73,7 +70,7 @@ class markdown(format):
     def description(self, desc):
         : **Discussion**
         :
-        : ${desc.Maptext(escape, textmap, tailmap, descflt)}
+        : ${desc.Maptext(escape, textmap, tailmap, self.description_filter)}
 
     def event(self, elem, ev):
         if "begin" == ev:

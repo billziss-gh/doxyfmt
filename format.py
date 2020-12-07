@@ -13,6 +13,9 @@ section_titles = {
 }
 
 class format(object):
+    description_filter = {
+        "para": lambda e: e.find("parameterlist") is None,
+    }
     section_titles = {
         "user-defined": "",
         "public-type": "",
@@ -96,7 +99,8 @@ class format(object):
             return
         self.__parameters(desc[".//parameterlistE"])
         self.__returns(desc[".//simplesect[@kind='return']E"])
-        self.description(desc)
+        if desc.Maptext(None, None, None, self.description_filter):
+            self.description(desc)
     def __event(self, elem, ev):
         if "begin" == ev:
             self.detailed.append(

@@ -36,7 +36,7 @@ class markdown(format):
         : #${heading * "#"} ${escape(text)}
         :
 
-    def name(self, kind, text, desc):
+    def name(self, text, desc):
         if self.isdetailed():
             : <summary>
             if desc.T:
@@ -49,9 +49,9 @@ class markdown(format):
             :
         else:
             if desc.T:
-                : **${escape(text)}** - ${escape(desc.T)}
+                : - *${escape(text)}* - ${escape(desc.T)}
             else:
-                : **${escape(text)}**
+                : - *${escape(text)}*
             :
 
     def syntax(self, text):
@@ -69,9 +69,6 @@ class markdown(format):
         : **Return Value**
         :
         : ${retv.Maptext(escape, textmap, tailmap)}
-
-    def members(self, list):
-        pass
 
     def description(self, desc):
         : **Discussion**

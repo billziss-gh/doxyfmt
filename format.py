@@ -16,32 +16,32 @@ class format(object):
     section_titles = {
         "user-defined": "",
         "public-type": "",
-        "public-func": "",
-        "public-attrib": "",
+        "public-func": "Methods",
+        "public-attrib": "Data Members",
         "public-slot": "",
         "signal": "",
         "dcop-func": "",
         "property": "",
         "event": "",
-        "public-static-func": "",
-        "public-static-attrib": "",
+        "public-static-func": "Static Methods",
+        "public-static-attrib": "Static Data Members",
         "protected-type": "",
-        "protected-func": "",
-        "protected-attrib": "",
+        "protected-func": "Protected Methods",
+        "protected-attrib": "Protected Data Members",
         "protected-slot": "",
-        "protected-static-func": "",
-        "protected-static-attrib": "",
+        "protected-static-func": "Protected Static Methods",
+        "protected-static-attrib": "Protected Static Data Members",
         "package-type": "",
-        "package-func": "",
-        "package-attrib": "",
-        "package-static-func": "",
-        "package-static-attrib": "",
+        "package-func": "Package Methods",
+        "package-attrib": "Package Data Members",
+        "package-static-func": "Package Static Methods",
+        "package-static-attrib": "Package Static Data Members",
         "private-type": "",
-        "private-func": "",
-        "private-attrib": "",
+        "private-func": "Private Methods",
+        "private-attrib": "Private Data Members",
         "private-slot": "",
-        "private-static-func": "",
-        "private-static-attrib": "",
+        "private-static-func": "Private Static Methods",
+        "private-static-attrib": "Private Static Data Members",
         "friend": "",
         "related": "",
         "define": "Macros",
@@ -63,15 +63,13 @@ class format(object):
         pass
     def title(self, text, heading):
         pass
-    def name(self, kind, text, desc):
+    def name(self, text, desc):
         pass
     def syntax(self, text):
         pass
     def parameters(self, parl):
         pass
     def returns(self, retv):
-        pass
-    def members(self, list):
         pass
     def description(self, desc):
         pass
@@ -81,9 +79,9 @@ class format(object):
     def __title(self, text, heading):
         if text:
             self.title(text, heading)
-    def __name(self, kind, text, desc):
+    def __name(self, text, desc):
         if text:
-            self.name(kind, text, desc)
+            self.name(text, desc)
     def __syntax(self, text):
         if text:
             self.syntax(text)
@@ -93,9 +91,6 @@ class format(object):
     def __returns(self, retv):
         if retv.T:
             self.returns(retv)
-    def __members(self, list):
-        if list:
-            self.members(list)
     def __description(self, desc):
         if not desc.T:
             return
@@ -116,9 +111,12 @@ class format(object):
 
     def memberdef(self, elem):
         self.__event(elem, "begin")
-        self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-        self.__syntax(elem.definitionS + elem.argsstringS)
-        self.__description(elem.detaileddescriptionE)
+        if "variable" == elem.kindA:
+            self.__name(elem.typeS + " " + elem.nameS, elem.briefdescriptionE)
+        else:
+            self.__name(elem.nameS, elem.briefdescriptionE)
+            self.__syntax(elem.definitionS + elem.argsstringS)
+            self.__description(elem.detaileddescriptionE)
         self.__event(elem, "end")
 
     def sectiondef(self, elem):
@@ -151,7 +149,7 @@ class format(object):
                     text = elem.compoundnameS
             self.__title(text, 1)
         else:
-            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
+            self.__name(elem.compoundnameS, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)
         self.inner_section(elem)
         for sect in elem.sectiondefL:

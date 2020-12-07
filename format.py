@@ -62,7 +62,7 @@ class format(object):
         self.copytext = ""
         self.detailed = []
 
-    def setoutfile(self, file):
+    def reset(self, file):
         pass
     def title(self, text, heading):
         pass
@@ -185,5 +185,5 @@ class format(object):
                 file = elem.compoundnameS
             file = file.replace("_", "__").replace(":", "").replace("/", "_").replace("\\", "_")
             with open(os.path.join(self.outdir, file + self.fileext), "w") as ofile:
-                self.setoutfile(ofile)
+                self.reset(ofile)
                 self.compounddef(comp)

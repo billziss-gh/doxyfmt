@@ -2,16 +2,6 @@ import html, re
 from format import format
 
 class markdown(format):
-    textmap = {
-        "listitem":                     "- %s",
-        "ndash":                        "--%s",
-        "parameteritem":                "- %s",
-        "parametername":                "*%s*",
-        "parameterdescription":         " - %s",
-    }
-    tailmap = {
-        "para":                         "\n\n%s",
-    }
     reC = re.compile
     escape_re = [
         reC(r"([\\`*_])"),              r"\\\1",
@@ -21,15 +11,49 @@ class markdown(format):
         reC(r"^([ \t]*)([0-9])([.)][ \t])"),r"\1\2\\\3",
     ]
 
-    @classmethod
-    def escape(cls, text):
-        for i in range(0, len(cls.escape_re), 2):
-            text = cls.escape_re[i].sub(cls.escape_re[i + 1], text)
+    def escape(self, text):
+        for i in range(0, len(self.escape_re), 2):
+            text = self.escape_re[i].sub(self.escape_re[i + 1], text)
         return text
+    def textfn(self, fmt, ind):
+        if isinstance(ind, int) and 0 <= ind:
+            def fn(elem):
+                prefix = self.__prefix
+                self.__prefix += " " * ind
+                return fmt.replace("{prefix}", prefix)
+        elif isinstance(ind, int) and 0 > ind:
+            def fn(elem):
+                prefix = self.__prefix
+                self.__prefix = self.__prefix[:ind]
+                return fmt.replace("{prefix}", prefix)
+        elif isinstance(ind, str):
+            def fn(elem):
+                prefix = self.__prefix
+                self.__prefix += ind
+                return fmt.replace("{prefix}", prefix)
+        return fn
+    def Maptext(self, elem, filter = None):
+        return elem.Maptext(self.escape, self.__textmap, self.__tailmap, filter)
 
-    def setoutfile(self, file):
+    def reset(self, file):
         global _
         _ = file
+        T = self.textfn
+        self.__prefix = ""
+        self.__textmap = {
+            "parameteritem":            T("\n{prefix}- %s", +4),
+            "parametername":            "*%s*",
+            "parameterdescription":     " - %s",
+            "itemizedlist":             T("\n{prefix}%s", 0),
+            "listitem":                 T("\n{prefix}- %s", +4),
+            "ndash":                    "--%s",
+        }
+        self.__tailmap = {
+            "para":                     T("\n\n{prefix}%s", 0),
+            "parameteritem":            T("%s", -4),
+            "itemizedlist":             T("\n{prefix}%s", 0),
+            "listitem":                 T("%s", -4),
+        }
 
     def title(self, text, heading):
         : ${heading * "#"} ${self.escape(text)}
@@ -68,17 +92,17 @@ class markdown(format):
     def parameters(self, parl):
         : **Parameters**
         :
-        : ${parl.Maptext(self.escape, self.textmap, self.tailmap)}
+        : ${self.Maptext(parl)}
 
     def returns(self, retv):
         : **Return Value**
         :
-        : ${retv.Maptext(self.escape, self.textmap, self.tailmap)}
+        : ${self.Maptext(retv)}
 
     def description(self, desc):
         : **Discussion**
         :
-        : ${desc.Maptext(self.escape, self.textmap, self.tailmap, self.description_filter)}
+        : ${self.Maptext(desc, self.description_filter)}
 
     def event(self, elem, ev):
         if "begin" == ev:

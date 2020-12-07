@@ -88,6 +88,12 @@ class format(object):
     def __syntax(self, text):
         if text:
             self.syntax(text)
+    def __enumvalues(self, enml):
+        if enml:
+            self.detailed.append(False)
+            for elem in enml:
+                self.__name(elem.nameS, elem.briefdescriptionE)
+            self.detailed.pop()
     def __parameters(self, parl):
         if parl.T:
             self.parameters(parl)
@@ -120,6 +126,7 @@ class format(object):
         else:
             self.__name(elem.nameS, elem.briefdescriptionE)
             self.__syntax(elem.definitionS + elem.argsstringS)
+            self.__enumvalues(elem.enumvalueL)
             self.__description(elem.detaileddescriptionE)
         self.__event(elem, "end")
 

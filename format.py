@@ -53,7 +53,8 @@ class format(object):
     }
     anon_re = re.compile(r"@[0-9]")
     description_filter = {
-        "para": lambda e: e.find("parameterlist") is None,
+        "para": lambda e: (e.find("parameterlist") is None) and
+            e.find("simplesect[@kind='copyright']") is None,
     }
 
     def __init__(self, index, outdir, fileext):
@@ -61,11 +62,14 @@ class format(object):
         self.outdir = outdir
         self.fileext = fileext
         self.language = ""
+        self.copytext = ""
         self.detailed = []
 
     def setoutfile(self, file):
         pass
     def title(self, text, heading):
+        pass
+    def copyright(self, text):
         pass
     def name(self, text, desc):
         pass
@@ -88,6 +92,9 @@ class format(object):
             if self.anon_re.match(text):
                 text = "anonymous " + kind
             self.name(text, desc)
+    def __copyright(self, text):
+        if text:
+            self.copyright(text)
     def __syntax(self, text):
         if text:
             self.syntax(text)
@@ -165,6 +172,8 @@ class format(object):
         self.innerclass_section(elem)
         for sect in elem.sectiondefL:
             self.sectiondef(sect)
+        if "file" == elem.kindA:
+            self.__copyright(self.copytext)
         self.__event(elem, "end")
 
     def main(self):
@@ -173,6 +182,7 @@ class format(object):
             if "file" != comp.kindA:
                 continue
             self.language = comp.languageA
+            self.copytext = comp[".//simplesect[@kind='copyright']E"]["T"]
             file = comp.locationE.fileA
             if not file:
                 file = elem.compoundnameS

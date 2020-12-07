@@ -33,6 +33,12 @@ class markdown(format):
         : ${heading * "#"} ${escape(text)}
         :
 
+    def copyright(self, text):
+        : ---
+        :
+        : <small>Copyright ${html.escape(text)}</small>
+        :
+
     def name(self, text, desc):
         if self.isdetailed():
             : <summary>

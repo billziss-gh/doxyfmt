@@ -142,7 +142,7 @@ class format(object):
         for memb in elem.memberdefL:
             self.memberdef(memb)
 
-    def inner_section(self, elem):
+    def innerclass_section(self, elem):
         list = elem.innerclassL
         if list:
             self.__title("Structures", 2)
@@ -165,7 +165,7 @@ class format(object):
         else:
             self.__name(elem.compoundnameS, elem.briefdescriptionE)
         self.__description(elem.detaileddescriptionE)
-        self.inner_section(elem)
+        self.innerclass_section(elem)
         for sect in elem.sectiondefL:
             self.sectiondef(sect)
         self.__event(elem, "end")

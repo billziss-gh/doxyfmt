@@ -30,7 +30,7 @@ class markdown(format):
         _ = file
 
     def title(self, text, heading):
-        : #${heading * "#"} ${escape(text)}
+        : ${heading * "#"} ${escape(text)}
         :
 
     def name(self, text, desc):

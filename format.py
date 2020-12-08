@@ -14,31 +14,31 @@ class format(object):
         "user-defined": "",
         "public-type": "",
         "public-func": "Methods",
-        "public-attrib": "Data Members",
+        "public-attrib": "Fields",
         "public-slot": "",
         "signal": "",
         "dcop-func": "",
         "property": "",
         "event": "",
         "public-static-func": "Static Methods",
-        "public-static-attrib": "Static Data Members",
+        "public-static-attrib": "Static Fields",
         "protected-type": "",
         "protected-func": "Protected Methods",
-        "protected-attrib": "Protected Data Members",
+        "protected-attrib": "Protected Fields",
         "protected-slot": "",
         "protected-static-func": "Protected Static Methods",
-        "protected-static-attrib": "Protected Static Data Members",
+        "protected-static-attrib": "Protected Static Fields",
         "package-type": "",
         "package-func": "Package Methods",
-        "package-attrib": "Package Data Members",
+        "package-attrib": "Package Fields",
         "package-static-func": "Package Static Methods",
-        "package-static-attrib": "Package Static Data Members",
+        "package-static-attrib": "Package Static Fields",
         "private-type": "",
         "private-func": "Private Methods",
-        "private-attrib": "Private Data Members",
+        "private-attrib": "Private Fields",
         "private-slot": "",
         "private-static-func": "Private Static Methods",
-        "private-static-attrib": "Private Static Data Members",
+        "private-static-attrib": "Private Static Fields",
         "friend": "",
         "related": "",
         "define": "Macros",
@@ -155,7 +155,7 @@ class format(object):
     def innerclass_section(self, elem):
         list = elem.innerclassL
         if list:
-            self.__title("Structures", 2)
+            self.__title("Data Structures", 2)
             for incl in list:
                 comp = self.index[incl.refidA].element()
                 self.compounddef(comp)

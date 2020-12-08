@@ -137,6 +137,7 @@ class markdown(format):
         elif "end" == ev:
             if self.isdetailed():
                 # name() adds <blockquote>; remove it
+                : <br/>
                 : </blockquote>
                 : </details>
                 :

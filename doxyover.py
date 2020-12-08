@@ -96,7 +96,7 @@ def readconf(path):
             if cont:
                 line = cont + line
                 cont = ""
-            part = line.split("=", 2)
+            part = line.split("=", maxsplit=1)
             if 2 != len(part):
                 continue
             plus = False

@@ -70,6 +70,7 @@ class markdown(format):
             "parameterdescription":     " - %s",
             "itemizedlist":             T("\n{prefix}%s", 0),
             "listitem":                 T("\n{prefix}- %s", +4),
+            "computeroutput":           " `%s",
             "ndash":                    "--%s",
         }
         self.__tailmap = {
@@ -77,6 +78,7 @@ class markdown(format):
             "parameteritem":            T("%s", -4),
             "itemizedlist":             T("\n{prefix}%s", 0),
             "listitem":                 T("%s", -4),
+            "computeroutput":           "` %s",
         }
 
     def title(self, text, heading):

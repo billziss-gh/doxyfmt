@@ -9,7 +9,7 @@
 
 import os, re
 
-class format(object):
+class doxyfmt(object):
     section_titles = {
         "user-defined": "",
         "public-type": "",

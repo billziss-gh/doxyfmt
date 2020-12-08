@@ -1,5 +1,15 @@
+# formats/markdown.pyt
+#
+# Copyright (c) 2014-2020, Bill Zissimopoulos. All rights reserved.
+#
+# This file is part of Doxyover.
+#
+# It is licensed under the MIT license. The full license text can be found
+# in the License.txt file at the root of this project.
+
 import html, re
-from format import format
+
+from doxyfmt import *
 
 class nlstream(object):
     # nlstream will *NOT* write the last line if it does not end in newline (\n)
@@ -25,7 +35,7 @@ class nlstream(object):
                 l = t
             self.__strm.write(l)
 
-class markdown(format):
+class markdown(doxyfmt):
     reC = re.compile
     escape_re = [
         reC(r"([\\`*_])"),              r"\\\1",

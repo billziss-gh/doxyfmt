@@ -1,6 +1,30 @@
 import html, re
 from format import format
 
+class nlstream(object):
+    # nlstream will *NOT* write the last line if it does not end in newline (\n)
+    def __init__(self, strm):
+        self.__strm = strm
+        self.__tail = ""
+        self.__nlct = 0
+    def write(self, s):
+        for l in s.splitlines(True):
+            if self.__tail:
+                l = self.__tail + l
+                self.__tail = ""
+            if "\n" != l[-1:]:
+                self.__tail = l
+                break
+            t = l.lstrip(" ")
+            if "\n" != t:
+                self.__nlct = 1
+            else:
+                self.__nlct += 1
+                if 2 < self.__nlct:
+                    continue
+                l = t
+            self.__strm.write(l)
+
 class markdown(format):
     reC = re.compile
     escape_re = [
@@ -37,7 +61,7 @@ class markdown(format):
 
     def reset(self, file):
         global _
-        _ = file
+        _ = nlstream(file)
         T = self.textfn
         self.__prefix = ""
         self.__textmap = {

@@ -130,7 +130,13 @@ class format(object):
         self.__event(elem, "begin")
         if self.isdetailed():
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            self.__syntax(elem.definitionS + elem.argsstringS)
+            if "define" == elem.kindA:
+                param = ""
+                if elem.paramE:
+                    param = "(" + ", ".join(e.T for e in elem[".//defnameL"]) + ")"
+                self.__syntax("#define " + elem.nameT + param)
+            else:
+                self.__syntax(elem.definitionT + elem.argsstringT)
             self.__enumvalues(elem.enumvalueL)
             self.__description(elem.detaileddescriptionE)
         else:

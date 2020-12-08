@@ -150,7 +150,7 @@ class element(object):
     def __str__(self):
         return str(self.XMLElement)
     def __bool__(self):
-        return self.XMLElement is not None
+        return "" != self.XMLElement.tag
     def __getitem__(self, name):
         return self.__getattr__(name)
     def __getattr__(self, name):

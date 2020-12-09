@@ -31,16 +31,18 @@ class markdown(doxylib.format):
             "listitem":                 I("%T\n{prefix}- %s", +1),
 
             "ulink":                    self.ulink,
-            "bold":                     "*%s",
+            "bold":                     "**%s",
             "s":                        "<s>%s",
             "strike":                   "<s>%s",
             "underline":                "<u>%s",
-            "emphasis":                 "_%s",
+            "emphasis":                 "*%s",
             "computeroutput":           "`%s",
             "subscript":                "<sub>%s",
             "superscript":              "<sup>%s",
             "center":                   "<center>%s",
             "small":                    "<small>%s",
+            "del":                      "<del>%s",
+            "ins":                      "<ins>%s",
 
             "mdash":                    "---%s",
             "ndash":                    "--%s",
@@ -58,16 +60,19 @@ class markdown(doxylib.format):
             "itemizedlist":             I("%T\n{prefix}%s", 0),
             "listitem":                 I("%T%s", -1),
 
-            "bold":                     "*%s",
+            "ulink":                    "</a>%s",
+            "bold":                     "**%s",
             "s":                        "</s>%s",
             "strike":                   "</s>%s",
             "underline":                "</u>%s",
-            "emphasis":                 "_%s",
+            "emphasis":                 "*%s",
             "computeroutput":           "`%s",
             "subscript":                "</sub>%s",
             "superscript":              "</sup>%s",
             "center":                   "</center>%s",
             "small":                    "</small>%s",
+            "del":                      "</del>%s",
+            "ins":                      "</ins>%s",
         }
         self.__blockquote = []
 
@@ -89,7 +94,7 @@ class markdown(doxylib.format):
         return fn
 
     def ulink(self, elem):
-        return "[%s](" + elem.get("url", "").replace("%", "%%") + ")"
+        return '<a href="' + elem.get("url", "").replace("%", "%%").replace('"', '') + '">%s'
 
     reC = re.compile
     escape_re = [

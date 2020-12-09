@@ -185,7 +185,7 @@ class format(object):
         "innerclass": "Data Structures",
     }
     anon_re = re.compile(r"@[0-9]")
-    description_filter = {
+    summary_filter = description_filter = {
         "para": lambda e: (e.find("parameterlist") is None) and
             e.find("simplesect[@kind='copyright']") is None,
     }
@@ -216,6 +216,8 @@ class format(object):
 
     def heading(self, text, level):
         pass
+    def summary(self, elem):
+        pass
     def copyright(self, text):
         pass
     def name(self, kind, text, desc):
@@ -236,6 +238,14 @@ class format(object):
     def __heading(self, text):
         if text:
             self.heading(text, self.__level + self.depth("sectiondef"))
+    def __summary(self, elem, elem2 = None):
+        if None != elem2:
+            desc = ET.Element("description")
+            desc.extend(elem.XMLElement.findall("para"))
+            desc.extend(elem2.XMLElement.findall("para"))
+            elem = element(desc)
+        if elem.T:
+            self.summary(elem)
     def __copyright(self, text):
         if text:
             self.copyright(text)
@@ -256,12 +266,7 @@ class format(object):
     def __enumvalues(self, elst):
         if elst:
             self.enumvalues(elst)
-    def __description(self, elem, elem2 = None):
-        if None != elem2:
-            desc = ET.Element("description")
-            desc.extend(elem.XMLElement.findall("para"))
-            desc.extend(elem2.XMLElement.findall("para"))
-            elem = element(desc)
+    def __description(self, elem):
         if elem.T:
             self.__parameters(elem[".//parameterlistE"])
             self.__returns(elem[".//simplesect[@kind='return']E"])
@@ -310,7 +315,7 @@ class format(object):
         if not text:
             text = self.section_titles.get(elem.kindA, "")
         self.__heading(text)
-        self.__description(elem.descriptionE)
+        self.__summary(elem.descriptionE)
         for e in elem.innerclassL:
             self.compounddef(self.index[e.refidA].element())
         for e in elem.memberdefL:
@@ -335,7 +340,7 @@ class format(object):
                 if not text or os.path.isabs(text):
                     text = elem.compoundnameS
             self.__heading(text)
-            self.__description(elem.briefdescriptionE, elem.detaileddescriptionE)
+            self.__summary(elem.briefdescriptionE, elem.detaileddescriptionE)
             for sect in elem.sectiondefL:
                 self.sectiondef(sect)
             self.__copyright(self.copytext)

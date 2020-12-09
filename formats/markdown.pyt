@@ -73,6 +73,11 @@ class markdown(doxylib.format):
         : ${level * "#"} ${self.escape(text)}
         :
 
+    def summary(self, elem):
+        self.blockquote()
+        : ${self.maptext(elem, self.summary_filter)}
+        :
+
     def copyright(self, text):
         self.blockquote()
         : ---

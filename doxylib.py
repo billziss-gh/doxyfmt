@@ -326,11 +326,12 @@ class format(object):
         # massage compounddef so that innerclass appears inside sectiondef
         e = elem.XMLElement
         incl = e.findall("innerclass")
-        for i in incl:
-            e.remove(i)
-        sect = ET.Element("sectiondef", { "kind": "innerclass" })
-        sect.extend(incl)
-        e.append(sect)
+        if incl:
+            for i in incl:
+                e.remove(i)
+            sect = ET.Element("sectiondef", { "kind": "innerclass" })
+            sect.extend(incl)
+            e.append(sect)
 
         self.__event(elem, "begin")
         if elem.kindA in ["file"]:

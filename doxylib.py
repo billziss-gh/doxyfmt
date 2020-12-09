@@ -256,7 +256,12 @@ class format(object):
     def __enumvalues(self, elst):
         if elst:
             self.enumvalues(elst)
-    def __description(self, elem):
+    def __description(self, elem, elem2 = None):
+        if None != elem2:
+            desc = ET.Element("description")
+            desc.extend(elem.XMLElement.findall("para"))
+            desc.extend(elem2.XMLElement.findall("para"))
+            elem = element(desc)
         if elem.T:
             self.__parameters(elem[".//parameterlistE"])
             self.__returns(elem[".//simplesect[@kind='return']E"])
@@ -330,8 +335,7 @@ class format(object):
                 if not text or os.path.isabs(text):
                     text = elem.compoundnameS
             self.__heading(text)
-            self.__description(elem.briefdescriptionE)
-            self.__description(elem.detaileddescriptionE)
+            self.__description(elem.briefdescriptionE, elem.detaileddescriptionE)
             for sect in elem.sectiondefL:
                 self.sectiondef(sect)
             self.__copyright(self.copytext)

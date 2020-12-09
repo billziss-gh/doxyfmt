@@ -25,12 +25,22 @@ class markdown(doxylib.format):
             "parameternamelist":        "%T%s",
             "parametername":            "%T*%s*",
             "parameterdescription":     "%T - %s",
+            "simplesect":               "%T%s",
 
             "itemizedlist":             I("%T\n{prefix}%s", 0),
             "listitem":                 I("%T\n{prefix}- %s", +1),
 
             "ulink":                    self.ulink,
+            "bold":                     "*%s",
+            "s":                        "<s>%s",
+            "strike":                   "<s>%s",
+            "underline":                "<u>%s",
+            "emphasis":                 "_%s",
             "computeroutput":           "`%s",
+            "subscript":                "<sub>%s",
+            "superscript":              "<sup>%s",
+            "center":                   "<center>%s",
+            "small":                    "<small>%s",
 
             "mdash":                    "---%s",
             "ndash":                    "--%s",
@@ -43,11 +53,21 @@ class markdown(doxylib.format):
             "parameternamelist":        "%T%s",
             "parametername":            "%T%s",
             "parameterdescription":     "%T%s",
+            "simplesect":               "%T%s",
 
             "itemizedlist":             I("%T\n{prefix}%s", 0),
             "listitem":                 I("%T%s", -1),
 
+            "bold":                     "*%s",
+            "s":                        "</s>%s",
+            "strike":                   "</s>%s",
+            "underline":                "</u>%s",
+            "emphasis":                 "_%s",
             "computeroutput":           "`%s",
+            "subscript":                "</sub>%s",
+            "superscript":              "</sup>%s",
+            "center":                   "</center>%s",
+            "small":                    "</small>%s",
         }
         self.__blockquote = []
 

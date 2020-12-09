@@ -1,249 +1,171 @@
+#!/usr/bin/env python
+#
 # doxyfmt.py
 #
 # Copyright (c) 2014-2020, Bill Zissimopoulos. All rights reserved.
 #
-# This file is part of Doxyover.
+# This file is part of Doxyfmt.
 #
 # It is licensed under the MIT license. The full license text can be found
 # in the License.txt file at the root of this project.
 
-import os, re, xml.etree.ElementTree as ET
+# # doxyfmt(1)
+# ============
+#
+# NAME
+# ----
+# doxyfmt - extract documentation from source files
+#
+# SYNOPSIS
+# --------
+# doxyfmt OPTIONS [file]
+#
+# DESCRIPTION
+# -----------
+# The *doxyfmt* utility is a wrapper around *doxygen* that can produce output
+# in a variety of formats using a simple template engine.
+#
+# For information on the source code documentation format accepted by
+# *dogygen* and thence *doxyfmt* please refer to the *doxygen*
+# documentation online.
+#
+# PYTHON TEMPLATE LANGUAGE
+# ------------------------
+# *Doxyfmt* templates are written in the Python Template Language.
+# They are essentially Python source code with the addition of a single new
+# feature, the *:* construct.
+#
+# The *:* construct is a shortcut for embedding text to be output in Python
+# source. Everything placed after a *:* will be copied to the output, Python
+# expressions can also be inserted by using the *${ python expression }*
+# construct (similar to shell expansion).
+#
+# Example:
+#
+#     : <summary>
+#     : <div class="summary">
+#     : <h1 class="${elem.tag}-name">${name}</h1>
+#     if abst:
+#         : <div class="${elem.tag}-abstract">${abst}</div>
+#     : </div>
+#     : </summary>
+#
+# DOXYFMT TEMPLATES
+# -------------------
+# Refer to the bundled templates for examples.
+#
+# OPTIONS
+# -------
+#
+# COPYRIGHT
+# ---------
+# (C) 2014-2020 Bill Zissimopoulos
 
-# Use doxystream to squash multiple blank lines. Note that doxystream
-# will *NOT* write the last line if it does not end in newline (\n).
-class doxystream(object):
-    def __init__(self, strm):
-        self.__strm = strm
-        self.__tail = ""
-        self.__nlct = 0
-    def write(self, s):
-        for l in s.splitlines(True):
-            if self.__tail:
-                l = self.__tail + l
-                self.__tail = ""
-            if "\n" != l[-1:]:
-                self.__tail = l
-                break
-            t = l.lstrip(" ")
-            if "\n" != t:
-                self.__nlct = 1
-            else:
-                self.__nlct += 1
-                if 2 < self.__nlct:
-                    continue
-                l = t
-            self.__strm.write(l)
+import argparse, os, shutil, subprocess, sys
+from glob import glob
 
-class doxyfmt(object):
-    section_titles = {
-        "user-defined": "",
-        "public-type": "",
-        "public-func": "Methods",
-        "public-attrib": "Fields",
-        "public-slot": "",
-        "signal": "",
-        "dcop-func": "",
-        "property": "",
-        "event": "",
-        "public-static-func": "Static Methods",
-        "public-static-attrib": "Static Fields",
-        "protected-type": "",
-        "protected-func": "Protected Methods",
-        "protected-attrib": "Protected Fields",
-        "protected-slot": "",
-        "protected-static-func": "Protected Static Methods",
-        "protected-static-attrib": "Protected Static Fields",
-        "package-type": "",
-        "package-func": "Package Methods",
-        "package-attrib": "Package Fields",
-        "package-static-func": "Package Static Methods",
-        "package-static-attrib": "Package Static Fields",
-        "private-type": "",
-        "private-func": "Private Methods",
-        "private-attrib": "Private Fields",
-        "private-slot": "",
-        "private-static-func": "Private Static Methods",
-        "private-static-attrib": "Private Static Fields",
-        "friend": "",
-        "related": "",
-        "define": "Macros",
-        "prototype": "",
-        "typedef": "Typedefs",
-        "enum": "Enums",
-        "func": "Functions",
-        "var": "",
-        # internal
-        "innerclass": "Data Structures",
-    }
-    anon_re = re.compile(r"@[0-9]")
-    description_filter = {
-        "para": lambda e: (e.find("parameterlist") is None) and
-            e.find("simplesect[@kind='copyright']") is None,
-    }
+sys.dont_write_bytecode = True
+import pytempl
+import doxylib
 
-    def __init__(self, index, outdir, fileext):
-        self.index = index
-        self.outdir = outdir
-        self.fileext = fileext
-        self.language = ""
-        self.copytext = ""
-        self.stack = []
-        self.__level = 1
+def info(s):
+    print("%s: %s" % (os.path.basename(sys.argv[0]), s))
+def warn(s):
+    print("%s: %s" % (os.path.basename(sys.argv[0]), s), file=sys.stderr)
+def fail(s, exitcode = 1):
+    warn(s)
+    sys.exit(exitcode)
 
-    def depth(self, tag):
-        depth = 0
-        for e in self.stack:
-            if tag == e.N:
-                depth += 1
-        return depth
-
-    def reset(self, file):
-        pass
-
-    def escape(self, text):
-        return text
-    def maptext(self, elem, filter = None):
-        return elem.Maptext(self.escape, None, None, filter)
-
-    def heading(self, text, level):
-        pass
-    def copyright(self, text):
-        pass
-    def name(self, kind, text, desc):
-        pass
-    def syntax(self, text):
-        pass
-    def parameters(self, elst):
-        pass
-    def returns(self, elem):
-        pass
-    def enumvalues(self, elst):
-        pass
-    def description(self, elem):
-        pass
-    def event(self, elem, ev):
-        pass
-
-    def __heading(self, text):
-        if text:
-            self.heading(text, self.__level + self.depth("sectiondef"))
-    def __copyright(self, text):
-        if text:
-            self.copyright(text)
-    def __name(self, kind, text, desc):
-        if text:
-            if self.anon_re.match(text):
-                text = "anonymous " + kind
-            self.name(kind, text, desc)
-    def __syntax(self, text):
-        if text:
-            self.syntax(text)
-    def __parameters(self, elst):
-        if elst.T:
-            self.parameters(elst)
-    def __returns(self, elem):
-        if elem.T:
-            self.returns(elem)
-    def __enumvalues(self, elst):
-        if elst:
-            self.enumvalues(elst)
-    def __description(self, elem):
-        if elem.T:
-            self.__parameters(elem[".//parameterlistE"])
-            self.__returns(elem[".//simplesect[@kind='return']E"])
-            if self.maptext(elem, self.description_filter):
-                self.description(elem)
-    def __event(self, elem, ev):
-        if "begin" == ev:
-            self.stack.append(elem)
-            self.event(elem, ev)
-        elif "end" == ev:
-            self.event(elem, ev)
-            self.stack.pop()
-
-    def memberdef(self, elem):
-        self.__event(elem, "begin")
-        if elem.kindA in ["function"]:
-            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            self.__syntax(elem.definitionT + elem.argsstringT)
-            self.__description(elem.detaileddescriptionE)
-        elif elem.kindA in ["variable"]:
-            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            self.__syntax(elem.definitionT)
-            self.__description(elem.detaileddescriptionE)
-        elif elem.kindA in ["enum"]:
-            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            self.__enumvalues(elem.enumvalueL)
-            self.__description(elem.detaileddescriptionE)
-        elif elem.kindA in ["define"]:
-            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            param = ""
-            if elem.paramE:
-                param = "(" + ", ".join(e.T for e in elem[".//defnameL"]) + ")"
-            self.__syntax("#define " + elem.nameT + param)
-            self.__description(elem.detaileddescriptionE)
-        elif elem.kindA in ["typedef"]:
-            pass # ignore
-        else:
-            raise NotImplementedError(elem.kindA)
-        self.__event(elem, "end")
-
-    def sectiondef(self, elem):
-        self.__event(elem, "begin")
-        text = elem.headerT
-        if not text:
-            text = self.section_titles.get(elem.kindA, "")
-        self.__heading(text)
-        self.__description(elem.descriptionE)
-        for e in elem.innerclassL:
-            self.compounddef(self.index[e.refidA].element())
-        for e in elem.memberdefL:
-            self.memberdef(e)
-        self.__event(elem, "end")
-
-    def compounddef(self, elem):
-        # massage compounddef so that innerclass appears inside sectiondef
-        e = elem.XMLElement
-        incl = e.findall("innerclass")
-        for i in incl:
-            e.remove(i)
-        sect = ET.Element("sectiondef", { "kind": "innerclass" })
-        sect.extend(incl)
-        e.append(sect)
-
-        self.__event(elem, "begin")
-        if elem.kindA in ["file"]:
-            text = elem.titleT
-            if not text:
-                text = elem.locationE.fileA
-                if not text or os.path.isabs(text):
-                    text = elem.compoundnameS
-            self.__heading(text)
-            self.__description(elem.briefdescriptionE)
-            self.__description(elem.detaileddescriptionE)
-            for sect in elem.sectiondefL:
-                self.sectiondef(sect)
-            self.__copyright(self.copytext)
-        elif elem.kindA in ["struct", "union"]:
-            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
-            self.__description(elem.detaileddescriptionE)
-            for sect in elem.sectiondefL:
-                self.sectiondef(sect)
-        else:
-            raise NotImplementedError(elem.kindA)
-        self.__event(elem, "end")
-
-    def main(self):
-        for i in self.index:
-            comp = self.index[i].element()
-            if "file" != comp.kindA:
+def readconf(path):
+    conf = {}
+    with open(path) as file:
+        cont = ""
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#"):
                 continue
-            self.language = comp.languageA
-            self.copytext = comp[".//simplesect[@kind='copyright']E"]["T"]
-            file = comp.locationE.fileA
-            if not file:
-                file = elem.compoundnameS
-            file = file.replace("_", "__").replace(":", "").replace("/", "_").replace("\\", "_")
-            with open(os.path.join(self.outdir, file + self.fileext), "w") as ofile:
-                self.reset(ofile)
-                self.compounddef(comp)
+            if line.endswith("\\"):
+                cont += line[:-1]
+                continue
+            if cont:
+                line = cont + line
+                cont = ""
+            part = line.split("=", maxsplit=1)
+            if 2 != len(part):
+                continue
+            plus = False
+            if part[0].endswith("+"):
+                part[0] = part[0][:-1]
+                plus = True
+            part[0] = part[0].strip()
+            part[1] = part[1].strip()
+            if plus:
+                prev = conf.get(part[0], "")
+                if prev:
+                    part[1] = prev + " " + part[1]
+            conf[part[0]] = part[1]
+    return conf
+
+def mkdirs(path):
+    try:
+        os.makedirs(path)
+    except:
+        pass
+
+def run():
+    path = args.file
+    conf = readconf(path)
+    for k in conf:
+        if k.startswith("GENERATE_"):
+            conf[k] = "NO"
+    conf["GENERATE_HTML"] = "NO"
+    conf["GENERATE_LATEX"] = "NO"
+    conf["GENERATE_XML"] = "YES"
+    conf["XML_PROGRAMLISTING"] = "NO"
+    doxy = shutil.which("doxygen")
+    if not doxy:
+        if sys.platform.startswith("win32"):
+            doxy = r"C:\Program Files\Doxygen\bin\doxygen.exe"
+    cdir = os.path.dirname(path)
+    subprocess.run(
+        [doxy, "-"],
+        input="\n".join("%s=%s" % (k, v) for k, v in conf.items()).encode("utf-8"),
+        cwd=cdir or None,
+        check=True)
+    xdir = os.path.join(cdir or ".", conf.get("OUTPUT_DIRECTORY", ""), conf.get("XML_OUTPUT", ""))
+    p = doxylib.parser(os.path.join(xdir, "index.xml"))
+    if args.output_directory:
+        mkdirs(args.output_directory)
+    args.template.main(p.index, args.output_directory or ".")
+
+def main():
+    global args
+    progdir = os.path.dirname(sys.argv[0])
+    formats = [os.path.basename(f)[:-len(".pyt")]
+        for f in glob(os.path.join(os.path.join(progdir, "formats", "*.pyt")))]
+    p = argparse.ArgumentParser()
+    p.add_argument("-f", dest="format", choices=formats, default="html",
+        help="output format")
+    p.add_argument("-F", dest="template",
+        help="format template file (overrides -f)")
+    p.add_argument("-o", dest="output_directory",
+        help="output directory")
+    p.add_argument("file", nargs="?", default="Doxyfile")
+    args = p.parse_args(sys.argv[1:])
+    if args.template is None:
+        args.template = os.path.join(progdir, "formats", args.format + ".pyt")
+    args.template = pytempl.template_load(args.template)
+    run()
+
+def __entry():
+    try:
+        main()
+    except EnvironmentError as ex:
+        fail(ex)
+    except subprocess.CalledProcessError as ex:
+        fail(ex)
+    except KeyboardInterrupt:
+        fail("interrupted", 130)
+
+if "__main__" == __name__:
+    __entry()

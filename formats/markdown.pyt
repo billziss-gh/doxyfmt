@@ -2,20 +2,19 @@
 #
 # Copyright (c) 2014-2020, Bill Zissimopoulos. All rights reserved.
 #
-# This file is part of Doxyover.
+# This file is part of Doxyfmt.
 #
 # It is licensed under the MIT license. The full license text can be found
 # in the License.txt file at the root of this project.
 
 import html, re
+import doxylib
 
-from doxyfmt import *
-
-class markdown(doxyfmt):
+class markdown(doxylib.format):
 
     def reset(self, file):
         global _
-        _ = doxystream(file)
+        _ = doxylib.ostream(file)
         I = self.indent
         self.__prefix = ""
         self.__textmap = {

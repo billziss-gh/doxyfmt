@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2014-2020, Bill Zissimopoulos. All rights reserved.
 #
-# This file is part of Doxyover.
+# This file is part of Doxyfmt.
 #
 # It is licensed under the MIT license. The full license text can be found
 # in the License.txt file at the root of this project.

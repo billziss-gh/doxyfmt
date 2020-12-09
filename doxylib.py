@@ -292,7 +292,9 @@ class format(object):
             self.__syntax("#define " + elem.nameT + param)
             self.__description(elem.detaileddescriptionE)
         elif elem.kindA in ["typedef"]:
-            pass # ignore
+            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
+            self.__syntax(elem.definitionT)
+            self.__description(elem.detaileddescriptionE)
         else:
             raise NotImplementedError(elem.kindA)
         self.__event(elem, "end")

@@ -29,6 +29,7 @@ class markdown(doxylib.format):
             "itemizedlist":             I("%T\n{prefix}%s", 0),
             "listitem":                 I("%T\n{prefix}- %s", +1),
 
+            "ulink":                    self.ulink,
             "computeroutput":           "`%s",
 
             "mdash":                    "---%s",
@@ -66,6 +67,9 @@ class markdown(doxylib.format):
                 prefix = self.__prefix
                 return fmt.replace("{prefix}", prefix)
         return fn
+
+    def ulink(self, elem):
+        return "[%s](" + elem.get("url", "").replace("%", "%%") + ")"
 
     reC = re.compile
     escape_re = [

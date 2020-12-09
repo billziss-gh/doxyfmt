@@ -144,7 +144,7 @@ def main():
     formats = [os.path.basename(f)[:-len(".pyt")]
         for f in glob(os.path.join(os.path.join(progdir, "formats", "*.pyt")))]
     p = argparse.ArgumentParser()
-    p.add_argument("-f", dest="format", choices=formats, default="html",
+    p.add_argument("-f", dest="format", choices=formats, default="markdown",
         help="output format")
     p.add_argument("-F", dest="template",
         help="format template file (overrides -f)")

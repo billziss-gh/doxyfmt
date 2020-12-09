@@ -24,6 +24,7 @@ class markdown(doxylib.format):
             "itemizedlist":             I("\n{prefix}%s", 0),
             "listitem":                 I("\n{prefix}- %s", +1),
             "computeroutput":           " `%s",
+            "mdash":                    "---%s",
             "ndash":                    "--%s",
         }
         self.__tailmap = {

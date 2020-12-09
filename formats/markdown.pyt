@@ -76,6 +76,19 @@ class markdown(doxylib.format):
         }
         self.__blockquote = []
 
+    reC = re.compile
+    escape_re = [
+        reC(r"([\\`*_])"),              r"\\\1",
+        reC(r"\[(.*]\()"),              r"\\[\1",
+        reC(r"^([ \t]*)>"),             r"\1\\>",
+        reC(r"^([ \t]*)([#+-][ \t])"),  r"\1\\\2",
+        reC(r"^([ \t]*)([0-9])([.)][ \t])"),r"\1\2\\\3",
+    ]
+    def escape(self, text):
+        for i in range(0, len(self.escape_re), 2):
+            text = self.escape_re[i].sub(self.escape_re[i + 1], text)
+        return text
+
     def indent(self, fmt, ind):
         if 0 < ind:
             def fn(elem):
@@ -95,19 +108,6 @@ class markdown(doxylib.format):
 
     def ulink(self, elem):
         return '<a href="' + elem.get("url", "").replace("%", "%%").replace('"', '') + '">%s'
-
-    reC = re.compile
-    escape_re = [
-        reC(r"([\\`*_])"),              r"\\\1",
-        reC(r"\[(.*]\()"),              r"\\[\1",
-        reC(r"^([ \t]*)>"),             r"\1\\>",
-        reC(r"^([ \t]*)([#+-][ \t])"),  r"\1\\\2",
-        reC(r"^([ \t]*)([0-9])([.)][ \t])"),r"\1\2\\\3",
-    ]
-    def escape(self, text):
-        for i in range(0, len(self.escape_re), 2):
-            text = self.escape_re[i].sub(self.escape_re[i + 1], text)
-        return text
 
     def maptext(self, elem, filter = None):
         return elem.Maptext(self.escape, self.__textmap, self.__tailmap, filter)

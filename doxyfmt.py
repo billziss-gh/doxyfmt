@@ -1,4 +1,4 @@
-# format.py
+# doxyfmt.py
 #
 # Copyright (c) 2014-2020, Bill Zissimopoulos. All rights reserved.
 #
@@ -7,7 +7,32 @@
 # It is licensed under the MIT license. The full license text can be found
 # in the License.txt file at the root of this project.
 
-import os, re
+import os, re, xml.etree.ElementTree as ET
+
+# Use doxystream to squash multiple blank lines. Note that doxystream
+# will *NOT* write the last line if it does not end in newline (\n).
+class doxystream(object):
+    def __init__(self, strm):
+        self.__strm = strm
+        self.__tail = ""
+        self.__nlct = 0
+    def write(self, s):
+        for l in s.splitlines(True):
+            if self.__tail:
+                l = self.__tail + l
+                self.__tail = ""
+            if "\n" != l[-1:]:
+                self.__tail = l
+                break
+            t = l.lstrip(" ")
+            if "\n" != t:
+                self.__nlct = 1
+            else:
+                self.__nlct += 1
+                if 2 < self.__nlct:
+                    continue
+                l = t
+            self.__strm.write(l)
 
 class doxyfmt(object):
     section_titles = {
@@ -47,6 +72,8 @@ class doxyfmt(object):
         "enum": "Enums",
         "func": "Functions",
         "var": "",
+        # internal
+        "innerclass": "Data Structures",
     }
     anon_re = re.compile(r"@[0-9]")
     description_filter = {
@@ -60,123 +87,150 @@ class doxyfmt(object):
         self.fileext = fileext
         self.language = ""
         self.copytext = ""
-        self.detailed = []
+        self.stack = []
+        self.__level = 1
+
+    def depth(self, tag):
+        depth = 0
+        for e in self.stack:
+            if tag == e.N:
+                depth += 1
+        return depth
 
     def reset(self, file):
         pass
-    def title(self, text, heading):
+
+    def escape(self, text):
+        return text
+    def maptext(self, elem, filter = None):
+        return elem.Maptext(self.escape, None, None, filter)
+
+    def heading(self, text, level):
         pass
     def copyright(self, text):
         pass
-    def name(self, text, desc):
+    def name(self, kind, text, desc):
         pass
     def syntax(self, text):
         pass
-    def parameters(self, parl):
+    def parameters(self, elst):
         pass
-    def returns(self, retv):
+    def returns(self, elem):
         pass
-    def description(self, desc):
+    def enumvalues(self, elst):
+        pass
+    def description(self, elem):
         pass
     def event(self, elem, ev):
         pass
 
-    def __title(self, text, heading):
+    def __heading(self, text):
         if text:
-            self.title(text, heading)
+            self.heading(text, self.__level + self.depth("sectiondef"))
+    def __copyright(self, text):
+        if text:
+            self.copyright(text)
     def __name(self, kind, text, desc):
         if text:
             if self.anon_re.match(text):
                 text = "anonymous " + kind
-            self.name(text, desc)
-    def __copyright(self, text):
-        if text:
-            self.copyright(text)
+            self.name(kind, text, desc)
     def __syntax(self, text):
         if text:
             self.syntax(text)
-    def __enumvalues(self, enml):
-        if enml:
-            self.detailed.append(False)
-            for elem in enml:
-                self.__name("enum", elem.nameS, elem.briefdescriptionE)
-            self.detailed.pop()
-    def __parameters(self, parl):
-        if parl.T:
-            self.parameters(parl)
-    def __returns(self, retv):
-        if retv.T:
-            self.returns(retv)
-    def __description(self, desc):
-        if not desc.T:
-            return
-        self.__parameters(desc[".//parameterlistE"])
-        self.__returns(desc[".//simplesect[@kind='return']E"])
-        if desc.Maptext(None, None, None, self.description_filter):
-            self.description(desc)
+    def __parameters(self, elst):
+        if elst.T:
+            self.parameters(elst)
+    def __returns(self, elem):
+        if elem.T:
+            self.returns(elem)
+    def __enumvalues(self, elst):
+        if elst:
+            self.enumvalues(elst)
+    def __description(self, elem):
+        if elem.T:
+            self.__parameters(elem[".//parameterlistE"])
+            self.__returns(elem[".//simplesect[@kind='return']E"])
+            if self.maptext(elem, self.description_filter):
+                self.description(elem)
     def __event(self, elem, ev):
         if "begin" == ev:
-            self.detailed.append(
-                (elem.N == "compounddef" and elem.kindA in ["class", "struct", "union"]) or
-                (elem.N == "memberdef" and elem.kindA in ["define", "enum", "typedef", "function"]))
+            self.stack.append(elem)
             self.event(elem, ev)
         elif "end" == ev:
             self.event(elem, ev)
-            self.detailed.pop()
-    def isdetailed(self):
-        return self.detailed and self.detailed[-1]
+            self.stack.pop()
 
     def memberdef(self, elem):
         self.__event(elem, "begin")
-        if self.isdetailed():
+        if elem.kindA in ["function"]:
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            if "define" == elem.kindA:
-                param = ""
-                if elem.paramE:
-                    param = "(" + ", ".join(e.T for e in elem[".//defnameL"]) + ")"
-                self.__syntax("#define " + elem.nameT + param)
-            else:
-                self.__syntax(elem.definitionT + elem.argsstringT)
+            self.__syntax(elem.definitionT + elem.argsstringT)
+            self.__description(elem.detaileddescriptionE)
+        elif elem.kindA in ["variable"]:
+            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
+            self.__syntax(elem.definitionT)
+            self.__description(elem.detaileddescriptionE)
+        elif elem.kindA in ["enum"]:
+            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
             self.__enumvalues(elem.enumvalueL)
             self.__description(elem.detaileddescriptionE)
+        elif elem.kindA in ["define"]:
+            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
+            param = ""
+            if elem.paramE:
+                param = "(" + ", ".join(e.T for e in elem[".//defnameL"]) + ")"
+            self.__syntax("#define " + elem.nameT + param)
+            self.__description(elem.detaileddescriptionE)
+        elif elem.kindA in ["typedef"]:
+            pass # ignore
         else:
-            self.__name(elem.kindA, " ".join([elem.typeS, elem.nameS]), elem.briefdescriptionE)
+            raise NotImplementedError(elem.kindA)
         self.__event(elem, "end")
 
     def sectiondef(self, elem):
-        text = elem.headerS
+        self.__event(elem, "begin")
+        text = elem.headerT
         if not text:
             text = self.section_titles.get(elem.kindA, "")
-        self.__title(text, 2)
+        self.__heading(text)
         self.__description(elem.descriptionE)
-        for memb in elem.memberdefL:
-            self.memberdef(memb)
-
-    def innerclass_section(self, elem):
-        list = elem.innerclassL
-        if list:
-            self.__title("Data Structures", 2)
-            for incl in list:
-                comp = self.index[incl.refidA].element()
-                self.compounddef(comp)
+        for e in elem.innerclassL:
+            self.compounddef(self.index[e.refidA].element())
+        for e in elem.memberdefL:
+            self.memberdef(e)
+        self.__event(elem, "end")
 
     def compounddef(self, elem):
+        # massage compounddef so that innerclass appears inside sectiondef
+        e = elem.XMLElement
+        incl = e.findall("innerclass")
+        for i in incl:
+            e.remove(i)
+        sect = ET.Element("sectiondef", { "kind": "innerclass" })
+        sect.extend(incl)
+        e.append(sect)
+
         self.__event(elem, "begin")
-        if "file" == elem.kindA:
-            text = elem.titleS
+        if elem.kindA in ["file"]:
+            text = elem.titleT
             if not text:
                 text = elem.locationE.fileA
                 if not text or os.path.isabs(text):
                     text = elem.compoundnameS
-            self.__title(text, 1)
-        else:
-            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
-        self.__description(elem.detaileddescriptionE)
-        self.innerclass_section(elem)
-        for sect in elem.sectiondefL:
-            self.sectiondef(sect)
-        if "file" == elem.kindA:
+            self.__heading(text)
+            self.__description(elem.briefdescriptionE)
+            self.__description(elem.detaileddescriptionE)
+            for sect in elem.sectiondefL:
+                self.sectiondef(sect)
             self.__copyright(self.copytext)
+        elif elem.kindA in ["struct", "union"]:
+            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
+            self.__description(elem.detaileddescriptionE)
+            for sect in elem.sectiondefL:
+                self.sectiondef(sect)
+        else:
+            raise NotImplementedError(elem.kindA)
         self.__event(elem, "end")
 
     def main(self):

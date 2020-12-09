@@ -284,16 +284,16 @@ class format(object):
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
             self.__enumvalues(elem.enumvalueL)
             self.__description(elem.detaileddescriptionE)
+        elif elem.kindA in ["typedef"]:
+            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
+            self.__syntax(elem.definitionT)
+            self.__description(elem.detaileddescriptionE)
         elif elem.kindA in ["define"]:
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
             param = ""
             if elem.paramE:
                 param = "(" + ", ".join(e.T for e in elem[".//defnameL"]) + ")"
             self.__syntax("#define " + elem.nameT + param)
-            self.__description(elem.detaileddescriptionE)
-        elif elem.kindA in ["typedef"]:
-            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
-            self.__syntax(elem.definitionT)
             self.__description(elem.detaileddescriptionE)
         else:
             raise NotImplementedError(elem.kindA)

@@ -14,10 +14,12 @@ def itermaptext(elem, escape, textmap, tailmap, filter = None):
     g = elem.tag
     f = textmap.get(g)
     t = elem.text or ""
-    t = t and t.strip()
     if f:
         if callable(f):
             f = f(elem)
+        if "%T" == f[:2]:
+            f = f[2:]
+            t = t and t.lstrip()
         yield f % escape(t)
     elif t:
         yield escape(t)
@@ -32,10 +34,12 @@ def itermaptext(elem, escape, textmap, tailmap, filter = None):
         yield from itermaptext(e, escape, textmap, tailmap, filter)
         f = tailmap.get(g)
         t = e.tail or ""
-        t = t and t.strip()
         if f:
             if callable(f):
                 f = f(e)
+            if "%T" == f[:2]:
+                f = f[2:]
+                t = t and t.lstrip()
             yield f % escape(t)
         elif t:
             yield escape(t)

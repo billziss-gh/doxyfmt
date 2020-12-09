@@ -18,21 +18,35 @@ class markdown(doxylib.format):
         I = self.indent
         self.__prefix = ""
         self.__textmap = {
-            "parameteritem":            I("\n{prefix}- %s", +1),
-            "parametername":            "*%s*",
-            "parameterdescription":     " - %s",
-            "itemizedlist":             I("\n{prefix}%s", 0),
-            "listitem":                 I("\n{prefix}- %s", +1),
-            "computeroutput":           " `%s",
+            "para":                     "%T%s",
+
+            "parameterlist":            "%T%s",
+            "parameteritem":            I("%T\n{prefix}- %s", +1),
+            "parameternamelist":        "%T%s",
+            "parametername":            "%T*%s*",
+            "parameterdescription":     "%T - %s",
+
+            "itemizedlist":             I("%T\n{prefix}%s", 0),
+            "listitem":                 I("%T\n{prefix}- %s", +1),
+
+            "computeroutput":           "`%s",
+
             "mdash":                    "---%s",
             "ndash":                    "--%s",
         }
         self.__tailmap = {
-            "para":                     I("\n\n{prefix}%s", 0),
-            "parameteritem":            I("%s", -1),
-            "itemizedlist":             I("\n{prefix}%s", 0),
-            "listitem":                 I("%s", -1),
-            "computeroutput":           "` %s",
+            "para":                     I("%T\n\n{prefix}%s", 0),
+
+            "parameterlist":            "%T%s",
+            "parameteritem":            I("%T%s", -1),
+            "parameternamelist":        "%T%s",
+            "parametername":            "%T%s",
+            "parameterdescription":     "%T%s",
+
+            "itemizedlist":             I("%T\n{prefix}%s", 0),
+            "listitem":                 I("%T%s", -1),
+
+            "computeroutput":           "`%s",
         }
         self.__blockquote = []
 

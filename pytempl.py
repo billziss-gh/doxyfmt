@@ -57,7 +57,7 @@ import os, re, sys, types
 # begin template engine
 template_copy_re = re.compile(r"^(\s*): ?(.*)", re.DOTALL)
 template_expr_re = re.compile(r"\$\{([^}]+)\}")
-template_copy_stmt = ("_.write(%r)", "_.write(str(%s))")
+template_copy_stmt = ("_.write(%r)", "_.write(_str(%s))")
 def template_translate(source):
     for line in source:
         m = template_copy_re.search(line)
@@ -73,6 +73,7 @@ def template_load(fullpath, _=None):
     m.__file__ = fullpath
     m.__loader__ = None
     m.__package__ = ""
+    m._str = str
     m._ = sys.stdout if _ is None else _
     with open(fullpath) as source:
         template_compile(source, fullpath, m.__dict__)
@@ -104,6 +105,7 @@ class loader:
         m.__file__ = self.fullpath
         m.__loader__ = self
         m.__package__ = fullname.rpartition('.')[0]
+        m._str = str
         m._ = sys.stdout
         try:
             with open(self.fullpath) as source:

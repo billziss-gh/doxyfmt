@@ -44,7 +44,7 @@ def itermaptext(elem, escape, textmap, tailmap, filter = None):
         elif t:
             yield escape(t)
 
-class element(object):
+class element:
     def __init__(self, XMLElement):
         if XMLElement is None:
             XMLElement = ET.Element("")
@@ -99,7 +99,7 @@ class element(object):
         tailmap = tailmap or {}
         return "".join(itermaptext(self.XMLElement, escape, textmap, tailmap, filter))
 
-class compound(object):
+class compound:
     def __init__(self, parser, ref):
         self.parser = parser
         self.cref = ref
@@ -111,7 +111,7 @@ class compound(object):
             self.cdef = self.parser.parse_compound(self.cref.refidA)
         return self.cdef
 
-class parser(object):
+class parser:
     def __init__(self, path):
         self.indexDir = os.path.dirname(path)
         self.index = {}
@@ -124,7 +124,7 @@ class parser(object):
 
 # Use ostream to squash multiple blank lines. Note that ostream
 # will *NOT* write the last line if it does not end in newline (\n).
-class ostream(object):
+class ostream:
     def __init__(self, strm):
         self.__strm = strm
         self.__tail = ""
@@ -147,7 +147,7 @@ class ostream(object):
                 l = t
             self.__strm.write(l)
 
-class format(object):
+class format:
     section_titles = {
         "user-defined": "",
         "public-type": "",

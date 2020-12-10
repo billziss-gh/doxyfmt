@@ -80,7 +80,7 @@ def template_load(fullpath, _=None):
 # end template engine -- seriously!
 
 # pytempl import hook; allows importing .pyt files directly
-class finder(object):
+class finder:
     def find_module(self, fullname, pathlist=None):
         if pathlist is None:
             filepath = os.path.join(*fullname.split(".")) + ".pyt"
@@ -94,7 +94,7 @@ class finder(object):
         return None
     def __pytempl__(self):
         pass
-class loader(object):
+class loader:
     def __init__(self, fullpath):
         self.fullpath = fullpath
     def load_module(self, fullname):

@@ -202,6 +202,7 @@ class format:
         self.copytext = ""
         self.stack = []
         self.__level = 1
+        self.__typedef_set = set()
 
     def depth(self, tag):
         depth = 0
@@ -285,6 +286,12 @@ class format:
             self.stack.pop()
 
     def memberdef(self, elem):
+        if elem.kindA in ["typedef"]:
+            e = elem[".//ref[@kindref='compound']E"]
+            if e:
+                self.__typedef_set.add(e.refidA)
+                self.compounddef(self.index[e.refidA].element(), elem.nameS, elem.definitionT)
+                return
         self.__event(elem, "begin")
         if elem.kindA in ["function"]:
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
@@ -314,6 +321,14 @@ class format:
         self.__event(elem, "end")
 
     def sectiondef(self, elem):
+        count = 0
+        for e in elem.innerclassL:
+            if e.refidA not in self.__typedef_set:
+                count += 1
+        for e in elem.memberdefL:
+            count += 1
+        if 0 == count:
+            return
         self.__event(elem, "begin")
         text = elem.headerT
         if not text:
@@ -321,12 +336,13 @@ class format:
         self.__heading(text)
         self.__summary(elem.descriptionE)
         for e in elem.innerclassL:
-            self.compounddef(self.index[e.refidA].element())
+            if e.refidA not in self.__typedef_set:
+                self.compounddef(self.index[e.refidA].element())
         for e in elem.memberdefL:
             self.memberdef(e)
         self.__event(elem, "end")
 
-    def compounddef(self, elem):
+    def compounddef(self, elem, override_name=None, override_definition=None):
         # massage compounddef so that innerclass appears inside sectiondef
         e = elem.XMLElement
         incl = e.findall("innerclass")
@@ -350,7 +366,9 @@ class format:
                 self.sectiondef(sect)
             self.__copyright(self.copytext)
         elif elem.kindA in ["struct", "union"]:
-            self.__name(elem.kindA, elem.compoundnameS, elem.briefdescriptionE)
+            self.__name(elem.kindA, override_name or elem.compoundnameS, elem.briefdescriptionE)
+            if override_definition:
+                self.__syntax(override_definition)
             self.__description(elem.detaileddescriptionE)
             for sect in elem.sectiondefL:
                 self.sectiondef(sect)

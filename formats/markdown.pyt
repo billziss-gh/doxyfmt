@@ -199,5 +199,6 @@ class markdown(doxylib.format):
                 :
                 self.__blockquote.pop()
 
-def main(index, outdir):
-    markdown(index, outdir, ".md").main()
+def main(conf, index):
+    conf.setdefault("fileext", ".md")
+    markdown(conf, index).main()

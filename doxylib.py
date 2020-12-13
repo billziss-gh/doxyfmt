@@ -194,10 +194,10 @@ class format:
             e.find("simplesect[@kind='copyright']") is None,
     }
 
-    def __init__(self, index, outdir, fileext):
+    def __init__(self, conf, index):
         self.index = index
-        self.outdir = outdir
-        self.fileext = fileext
+        self.outdir = conf["outdir"]
+        self.fileext = conf["fileext"]
         self.language = ""
         self.copytext = ""
         self.stack = []
@@ -387,6 +387,6 @@ class format:
             if not file:
                 file = elem.compoundnameS
             file = file.replace("_", "__").replace(":", "").replace("/", "_").replace("\\", "_")
-            with open(os.path.join(self.outdir, file + self.fileext), "w") as ofile:
+            with open(os.path.join(self.outdir, file + self.fileext), "w", newline="\n") as ofile:
                 self.reset(ofile)
                 self.compounddef(comp)

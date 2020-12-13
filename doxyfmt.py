@@ -108,14 +108,19 @@ def readconf(path):
 
 def run():
     path = args.file
-    odir = os.path.abspath(args.output_directory or ".")
-    xdir = os.path.join(odir, "xml")
+    xdir = os.path.join(args.conf["outdir"], "xml")
     conf = readconf(path)
     for k in conf:
         if k.startswith("GENERATE_"):
             conf[k] = "NO"
+    for k in args.conf:
+        if k == k.upper():
+            conf[k] = args.conf[k]
     conf["GENERATE_HTML"] = "NO"
     conf["GENERATE_LATEX"] = "NO"
+    conf["GENERATE_RTF"] = "NO"
+    conf["GENERATE_MAN"] = "NO"
+    conf["GENERATE_DOCBOOK"] = "NO"
     conf["GENERATE_XML"] = "YES"
     conf["XML_PROGRAMLISTING"] = "NO"
     conf["XML_OUTPUT"] = xdir
@@ -130,7 +135,8 @@ def run():
         cwd=os.path.dirname(path) or None,
         check=True)
     p = doxylib.parser(os.path.join(xdir, "index.xml"))
-    args.template.main(p.index, odir)
+    conf.update(args.conf)
+    args.template.main(conf, p.index)
     if not args.keep_xml:
         shutil.rmtree(xdir, ignore_errors=True)
 
@@ -144,12 +150,23 @@ def main():
         help="output format")
     p.add_argument("-F", dest="template",
         help="format template file (overrides -f)")
+    p.add_argument("-c", dest="conflist", action="append", metavar="NAME=VALUE",
+        help="set configuration value")
     p.add_argument("-k", dest="keep_xml", action="store_true",
         help="keep doxygen xml files")
-    p.add_argument("-o", dest="output_directory",
+    p.add_argument("-o", dest="outdir",
         help="output directory")
     p.add_argument("file", nargs="?", default="Doxyfile")
     args = p.parse_args(sys.argv[1:])
+    args.conf = {}
+    for i in args.conflist or []:
+        p = i.split("=", maxsplit=1)
+        if 2 == len(p):
+            args.conf[p[0]] = p[1]
+        else:
+            args.conf[p[0]] = True
+    args.conf.setdefault("outdir", args.outdir or ".")
+    args.conf["outdir"] = os.path.abspath(args.conf["outdir"])
     if args.template is None:
         args.template = os.path.join(progdir, "formats", args.format + ".pyt")
     args.template = pytempl.template_load(args.template)

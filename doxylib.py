@@ -321,7 +321,7 @@ class format:
         if elem.T:
             self.__parameters(elem[".//parameterlistE"])
             self.__returns(elem[".//simplesect[@kind='return']E"])
-            if self.maptext(elem, self.description_filter):
+            if self.maptext(elem, self.description_filter).strip():
                 self.description(elem)
     def __event(self, elem, ev):
         if "begin" == ev:

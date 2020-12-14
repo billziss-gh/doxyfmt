@@ -149,6 +149,7 @@ class ostream:
 
 class format:
     section_titles = {
+        # DoxSectionKind
         "user-defined": "",
         "public-type": "",
         "public-func": "Methods",
@@ -187,6 +188,45 @@ class format:
         "var": "",
         # internal
         "innerclass": "Data Structures",
+    }
+    kind_titles = {
+        # DoxCompoundKind
+        "class": "class",
+        "struct": "struct",
+        "union": "union",
+        "interface": "interface",
+        "protocol": "protocol",
+        "category": "category",
+        "exception": "",
+        "service": "",
+        "singleton": "",
+        "module": "",
+        "type": "",
+        "file": "",
+        "namespace": "",
+        "group": "",
+        "page": "",
+        "example": "",
+        "dir": "",
+
+        # DoxMemberKind
+        "define": "",
+        "property": "",
+        "event": "",
+        "variable": "",
+        "typedef": "typedef",
+        "enum": "enum",
+        "function": "%s()",
+        "signal": "",
+        "prototype": "",
+        "friend": "",
+        "dcop": "",
+        "slot": "",
+        "interface": "",
+        "service": "",
+        # internal
+        "FUNCTION-MACRO": "%s()",
+        "OBJECT-MACRO": "",
     }
     anon_re = re.compile(r"@[0-9]")
     summary_filter = description_filter = {
@@ -257,8 +297,13 @@ class format:
             self.copyright(text)
     def __name(self, kind, text, desc):
         if text:
+            kind = self.kind_titles.get(kind, "")
             if self.anon_re.match(text):
-                text = "anonymous " + kind
+                text = ""
+            if "%s" in kind:
+                text = kind % text
+            else:
+                text = " ".join([kind, text])
             self.name(kind, text, desc)
     def __syntax(self, text):
         if text:
@@ -312,7 +357,11 @@ class format:
             self.__syntax(elem.definitionT)
             self.__description(elem.detaileddescriptionE)
         elif elem.kindA in ["define"]:
-            self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
+            if elem.paramE:
+                kind = "FUNCTION-MACRO"
+            else:
+                kind = "OBJECT-MACRO"
+            self.__name(kind, elem.nameS, elem.briefdescriptionE)
             param = ""
             if elem.paramE:
                 param = "(" + ", ".join(e.T for e in elem[".//defnameL"]) + ")"

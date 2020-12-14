@@ -195,6 +195,7 @@ class format:
     }
 
     def __init__(self, conf, index):
+        self.conf = conf
         self.index = index
         self.outdir = conf["outdir"]
         self.fileext = conf["fileext"]
@@ -292,6 +293,7 @@ class format:
                 self.__typedef_set.add(e.refidA)
                 self.compounddef(self.index[e.refidA].element(), elem.nameS, elem.definitionT)
                 return
+
         self.__event(elem, "begin")
         if elem.kindA in ["function"]:
             self.__name(elem.kindA, elem.nameS, elem.briefdescriptionE)
@@ -329,17 +331,32 @@ class format:
             count += 1
         if 0 == count:
             return
+
         self.__event(elem, "begin")
         text = elem.headerT
         if not text:
             text = self.section_titles.get(elem.kindA, "")
         self.__heading(text)
         self.__summary(elem.descriptionE)
+        contents = []
         for e in elem.innerclassL:
             if e.refidA not in self.__typedef_set:
-                self.compounddef(self.index[e.refidA].element())
+                contents.append(self.index[e.refidA].element())
         for e in elem.memberdefL:
-            self.memberdef(e)
+            contents.append(e)
+        order = self.conf.get("order", "source")
+        if "doxygen" == order:
+            pass
+        elif "alpha" == order:
+            contents.sort(key = lambda e: e.compoundnameS or e.nameS)
+        else: # "source"
+            contents.sort(key = lambda e: "%s:%10s:%10s" %
+                (e.locationE.fileA, e.locationE.lineA, e.locationE.columnA))
+        for e in contents:
+            if "compounddef" == e.N:
+                self.compounddef(e)
+            elif "memberdef" == e.N:
+                self.memberdef(e)
         self.__event(elem, "end")
 
     def compounddef(self, elem, override_name=None, override_definition=None):

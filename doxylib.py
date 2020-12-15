@@ -242,7 +242,6 @@ class format:
         self.language = ""
         self.copytext = ""
         self.stack = []
-        self.__level = 1
         self.__typedef_set = set()
 
     def depth(self, tag):
@@ -283,7 +282,7 @@ class format:
 
     def __heading(self, text):
         if text:
-            self.heading(text, self.__level + self.depth("sectiondef"))
+            self.heading(text, int(self.conf.get("heading", "1")) + self.depth("sectiondef"))
     def __summary(self, elem, elem2 = None):
         if None != elem2:
             desc = ET.Element("description")

@@ -46,6 +46,7 @@ class markdown(doxylib.format):
 
             "mdash":                    "---%s",
             "ndash":                    "--%s",
+            "ne":                       "≠%s",
         }
         self.__tailmap = {
             "para":                     I("%T\n\n{prefix}%s", 0),
